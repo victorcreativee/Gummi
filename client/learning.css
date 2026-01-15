@@ -1,0 +1,37 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+}
+.header {
+  display: flex;
+}
+.logo {
+  width: 6rem;
+  margin-right: auto;
+}
+.container {
+  background-color: rgb(208, 226, 235);
+  width: 100%;
+  height: auto;
+  padding: 20px;
+  margin: auto;
+  display: flex;
+}
+.service-t {
+  position: relative;
+  top: -50px;
+  left: 50%;
+}
+.cta {
+  background-color: beige;
+  width: 100%;
+  display: flex;
+  padding: 20px;
+}
+.why-t {
+  position: relative;
+  top: -50px;
+  left: 50%;
+  margin: 2rem;
+}
