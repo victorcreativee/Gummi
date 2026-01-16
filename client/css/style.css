@@ -14,23 +14,30 @@ body {
   height: auto;
   margin-left: 220px;
 }
-.container {
-  display: flex;
-  direction: column;
-  justify-content: center;
 
-  /* align-items: center; */
+.hero {
+  padding: 80px 20px;
+  width: 800px;
+  margin: 0 auto;
 }
-.container,
-h1 {
+.hero h1 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin-bottom: 30px;
+}
+
+.hero button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  cursor: pointer;
   text-align: center;
-}
-.main-content {
-  background-color: rgb(205, 236, 247);
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0px 10px 0px;
-  border-radius: 10px;
+  transform: translateX(250px);
 }
 .footer {
   display: relative;
