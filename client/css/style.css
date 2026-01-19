@@ -44,3 +44,7 @@ body {
   text-align: center;
   padding: 10px;
 }
+
+.bg {
+  background-color: rgb(202, 216, 244);
+}
