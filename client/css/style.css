@@ -35,16 +35,10 @@ body {
 .hero button {
   padding: 12px 24px;
   font-size: 1rem;
+  background-color: rgb(205, 224, 241);
   cursor: pointer;
   text-align: center;
   transform: translateX(250px);
-}
-.footer {
-  display: relative;
-  text-align: center;
-  padding: 10px;
-}
-
-.bg {
-  background-color: rgb(202, 216, 244);
+  border: none;
+  border-radius: 5px;
 }
