@@ -1,14 +1,18 @@
-# Gummi Platform
+# GUMMI
 
+GUMMI is a career-driven learning, collaboration, and verified talent ecosystem.
 
-## Description
-  GUMMI is a career-driven learning and collaboration platform that connects learners with real-life professionals to learn, teach, collaborate, and build real projects together.
+The mission is simple:
 
-## Tech Stack
-- HTML
-- CSS
-- JavaScript
-- Git & GitHub
+> Talent should not depend on connections.
 
-## Author
-Victor Tuyizere
+GUMMI helps skilled people prove what they can do, collaborate on real projects, learn from active professionals, and access real opportunities.
+
+## Core Stack
+
+- Frontend: Next.js + TypeScript
+- Backend: Java Spring Boot microservices
+- AI: Python + FastAPI
+- Database: PostgreSQL
+- Cache/Queue: Redis
+- DevOps: Docker
