@@ -22,7 +22,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-[#0D0D0D] text-[#F5F1E8]">
       <section className="mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-6 py-12">
         <p className="mb-6 w-fit rounded-full border border-[#F5F1E8]/20 px-4 py-2 text-sm text-[#C7FF6B]">
-          Built for hidden builders
+          Built for hidden talents
         </p>
         <p className="mb-8 text-sm text-[#F5F1E8]/50">
           API status:{" "}
@@ -42,7 +42,7 @@ export default async function HomePage() {
             <p className="mt-8 max-w-2xl text-lg leading-8 text-[#F5F1E8]/70 md:text-xl">
               GUMMI helps skilled people prove what they can do, learn from real
               professionals, build projects together, and get discovered through
-              work — not noise.
+              work not noise.
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -69,7 +69,7 @@ export default async function HomePage() {
               </p>
 
               <h2 className="mt-4 text-2xl font-black">
-                Aisha rebuilt a broken checkout flow.
+                Victor rebuilt a broken checkout flow.
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-black/70">
