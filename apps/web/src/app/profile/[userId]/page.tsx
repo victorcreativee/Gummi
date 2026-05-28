@@ -15,48 +15,48 @@ export default async function PublicProfilePage({
   const skills = await getBuilderSkills(userId).catch(() => []);
 
   return (
-    <main className="min-h-screen bg-[#0D0D0D] text-[#F5F1E8]">
+    <main className="min-h-screen bg-[#F8FAFC] text-[#102848]">
       <section className="grid min-h-screen grid-cols-1 gap-4 p-4 lg:grid-cols-[360px_1fr]">
-        <aside className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-7">
-          <a href="/dashboard" className="text-sm font-black text-[#C7FF6B]">
+        <aside className="rounded-[2.5rem] border border-[#DCE7F2] bg-white p-7 shadow-sm">
+          <a href="/dashboard" className="text-sm font-black text-[#0890E0]">
             ← Back to workspace
           </a>
 
           <div className="mt-12">
-            <div className="flex h-24 w-24 items-center justify-center rounded-[2rem] bg-[#C7FF6B] text-4xl font-black text-black">
+            <div className="flex h-24 w-24 items-center justify-center rounded-[2rem] bg-[#0890E0] text-4xl font-black text-white">
               G
             </div>
 
-            <p className="mt-8 text-sm font-bold uppercase tracking-wide text-[#F5F1E8]/40">
-              Proof profile
+            <p className="mt-8 text-sm font-bold uppercase tracking-wide text-[#102848]/40">
+              GUMMI profile
             </p>
 
             <h1 className="mt-4 text-4xl font-black leading-tight">
               {profile?.headline || "Untitled GUMMI profile"}
             </h1>
 
-            <div className="mt-8 space-y-4 text-sm font-bold text-[#F5F1E8]/60">
+            <div className="mt-8 space-y-4 text-sm font-bold text-[#102848]/60">
               <p>{profile?.location || "Location not added"}</p>
               <p>{profile?.availability || "Availability not added"}</p>
             </div>
           </div>
         </aside>
 
-        <section className="rounded-[2.5rem] bg-[#F5F1E8] p-6 text-black md:p-8">
+        <section className="rounded-[2.5rem] border border-[#DCE7F2] bg-white p-6 text-[#102848] shadow-sm md:p-8">
           <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[2rem] bg-white p-7">
-              <p className="text-sm font-bold uppercase tracking-wide text-black/40">
+            <div className="rounded-[2rem] bg-[#F8FAFC] p-7 ring-1 ring-[#DCE7F2]">
+              <p className="text-sm font-bold uppercase tracking-wide text-[#102848]/40">
                 Story
               </p>
 
-              <p className="mt-5 text-xl leading-9 text-black/65">
+              <p className="mt-5 text-xl leading-9 text-[#102848]/65">
                 {profile?.story || "This person has not added their story yet."}
               </p>
             </div>
 
-            <div className="rounded-[2rem] bg-black p-7 text-[#F5F1E8]">
-              <p className="text-sm font-bold uppercase tracking-wide text-[#C7FF6B]">
-                Currently building
+            <div className="rounded-[2rem] bg-[#182838] p-7 text-white">
+              <p className="text-sm font-bold uppercase tracking-wide text-[#72C7F4]">
+                Building now
               </p>
 
               <h2 className="mt-5 text-3xl font-black leading-tight">
@@ -65,13 +65,13 @@ export default async function PublicProfilePage({
             </div>
           </div>
 
-          <div className="mt-5 rounded-[2rem] bg-white p-7">
-            <p className="text-sm font-bold uppercase tracking-wide text-black/40">
+          <div className="mt-5 rounded-[2rem] bg-[#F8FAFC] p-7 ring-1 ring-[#DCE7F2]">
+            <p className="text-sm font-bold uppercase tracking-wide text-[#102848]/40">
               Skills
             </p>
 
             {skills.length === 0 ? (
-              <p className="mt-4 text-sm font-bold text-black/50">
+              <p className="mt-4 text-sm font-bold text-[#102848]/50">
                 No skills added yet.
               </p>
             ) : (
@@ -79,7 +79,7 @@ export default async function PublicProfilePage({
                 {skills.map((skill: any) => (
                   <span
                     key={skill.id}
-                    className="rounded-full bg-[#C7FF6B] px-4 py-2 text-sm font-black text-black"
+                    className="rounded-full border border-[#0890E0]/25 bg-white px-4 py-2 text-sm font-black text-[#102848]"
                   >
                     {skill.skillName}
                   </span>
@@ -89,32 +89,32 @@ export default async function PublicProfilePage({
           </div>
 
           <div className="mt-5 grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
-            <div className="rounded-[2rem] border border-black/10 bg-[#EFEAE2] p-7">
-              <p className="text-sm font-bold uppercase tracking-wide text-black/40">
-                Proof status
+            <div className="rounded-[2rem] border border-[#DCE7F2] bg-[#EEF5FB] p-7">
+              <p className="text-sm font-bold uppercase tracking-wide text-[#102848]/40">
+                Profile status
               </p>
 
               <h3 className="mt-4 text-3xl font-black">Early-stage profile</h3>
 
-              <p className="mt-4 text-sm leading-7 text-black/55">
+              <p className="mt-4 text-sm leading-7 text-[#102848]/55">
                 This profile has started collecting skills and identity signals.
-                Proof challenges, project history, and verification layers come
+                Proof submissions, project history, and verification layers come
                 next.
               </p>
             </div>
 
-            <div className="rounded-[2rem] bg-black p-7 text-[#F5F1E8]">
-              <p className="text-sm font-bold uppercase tracking-wide text-[#C7FF6B]">
-                Next proof layer
+            <div className="rounded-[2rem] bg-[#102848] p-7 text-white">
+              <p className="text-sm font-bold uppercase tracking-wide text-[#72C7F4]">
+                Next layer
               </p>
 
               <h3 className="mt-4 text-3xl font-black">
-                Work samples coming next.
+                Work samples are next.
               </h3>
 
-              <p className="mt-4 text-sm leading-7 text-[#F5F1E8]/55">
-                Soon this profile will show real projects, challenge results,
-                peer validations, and proof-of-work submissions.
+              <p className="mt-4 text-sm leading-7 text-white/60">
+                GUMMI will soon show real projects, proof cards, peer signals,
+                and challenge results here.
               </p>
             </div>
           </div>
