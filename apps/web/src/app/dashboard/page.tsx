@@ -7,6 +7,8 @@ import {
   getBuilderSkills,
   getUserProfile,
   saveUserProfile,
+  createProof,
+  getUserProofs,
 } from "../../lib/api";
 import WorkspaceTopbar from "../../components/workspace/WorkspaceTopbar";
 
@@ -26,7 +28,24 @@ type BuilderSkill = {
   status: string;
   createdAt: string;
 };
-
+type ProofSubmission = {
+  id: string;
+  userId: string;
+  title: string;
+  careerCategory: string;
+  proofType: string;
+  description: string;
+  proofLink?: string;
+  mediaUrl?: string;
+  toolsUsed?: string;
+  status: string;
+  verificationScore: number;
+  createdAt: string;
+  reviewStatus?: string;
+  reviewNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+};
 export default function DashboardPage() {
   const router = useRouter();
 
@@ -47,6 +66,17 @@ export default function DashboardPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
+  const [proofs, setProofs] = useState<ProofSubmission[]>([]);
+  const [showProofForm, setShowProofForm] = useState(false);
+  const [savingProof, setSavingProof] = useState(false);
+  const [proofMessage, setProofMessage] = useState("");
+
+  const [proofTitle, setProofTitle] = useState("");
+  const [careerCategory, setCareerCategory] = useState("TECH_BUILDER");
+  const [proofType, setProofType] = useState("PROJECT");
+  const [proofDescription, setProofDescription] = useState("");
+  const [proofLink, setProofLink] = useState("");
+  const [toolsUsed, setToolsUsed] = useState("");
 
   function getCurrentUserId() {
     return user?.id || user?.userId;
@@ -69,9 +99,11 @@ export default function DashboardPage() {
     Promise.all([
       getBuilderSkills(currentUserId).catch(() => []),
       getUserProfile(currentUserId).catch(() => null),
+      getUserProofs(currentUserId).catch(() => []),
     ])
-      .then(([loadedSkills, loadedProfile]) => {
+      .then(([loadedSkills, loadedProfile, loadedProofs]) => {
         setSkills(loadedSkills);
+        setProofs(loadedProofs);
 
         if (loadedProfile) {
           setHeadline(loadedProfile.headline || "");
@@ -164,7 +196,50 @@ export default function DashboardPage() {
       setSavingProfile(false);
     }
   }
+  async function handleCreateProof(event: FormEvent) {
+    event.preventDefault();
 
+    const currentUserId = getCurrentUserId();
+
+    if (!currentUserId) {
+      setProofMessage("Your session is missing. Please login again.");
+      return;
+    }
+
+    setSavingProof(true);
+    setProofMessage("");
+
+    try {
+      const savedProof = await createProof({
+        userId: currentUserId,
+        title: proofTitle,
+        careerCategory,
+        proofType,
+        description: proofDescription,
+        proofLink,
+        toolsUsed,
+      });
+
+      setProofs((currentProofs) => [savedProof, ...currentProofs]);
+      setProofMessage(
+        "Proof added. Your profile now has one more real signal."
+      );
+
+      setProofTitle("");
+      setCareerCategory("TECH_BUILDER");
+      setProofType("PROJECT");
+      setProofDescription("");
+      setProofLink("");
+      setToolsUsed("");
+      setShowProofForm(false);
+    } catch (error) {
+      setProofMessage(
+        error instanceof Error ? error.message : "Could not submit proof"
+      );
+    } finally {
+      setSavingProof(false);
+    }
+  }
   function handleLogout() {
     localStorage.removeItem("gummi_token");
     localStorage.removeItem("gummi_user");
@@ -287,59 +362,240 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-6">
-                <h2 className="text-lg font-black">Proof Ledger</h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-black">Proof Ledger</h2>
+                    <p className="mt-1 text-sm font-bold text-[#102848]/55">
+                      Submit real work, project links, case studies, or
+                      challenge results.
+                    </p>
+                  </div>
 
-                <div className="mt-4 space-y-4 border-l-2 border-[#0890E0]/25 pl-7">
-                  {[
-                    {
-                      title: "GUMMI identity created",
-                      desc: "You started building a profile around skill, work, and proof.",
-                      status: "Live",
-                    },
-                    {
-                      title: "Skill signals added",
-                      desc: `${skills.length} skills added to your GUMMI profile.`,
-                      status: "In Progress",
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.title}
-                      className="relative rounded-[1.5rem] bg-white p-6 shadow-sm ring-1 ring-[#DCE7F2]"
-                    >
-                      <span className="absolute -left-[37px] top-7 h-4 w-4 rounded-full bg-[#0890E0]" />
+                  <button
+                    onClick={() => setShowProofForm((current) => !current)}
+                    className="rounded-xl bg-[#0890E0] px-4 py-3 text-sm font-black text-white"
+                  >
+                    {showProofForm ? "Close form" : "Submit proof"}
+                  </button>
+                </div>
+                {showProofForm && (
+                  <form
+                    onSubmit={handleCreateProof}
+                    className="mt-4 rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-[#DCE7F2]"
+                  >
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0890E0]">
+                      Submit proof
+                    </p>
 
-                      <div className="flex justify-between gap-4">
-                        <h3 className="text-lg font-black">{item.title}</h3>
+                    <h3 className="mt-2 text-2xl font-black">
+                      What did you build, design, shoot, edit, or publish?
+                    </h3>
 
-                        <span className="rounded-full bg-[#EAF3FF] px-4 py-2 text-xs font-black text-[#0890E0]">
-                          {item.status}
-                        </span>
+                    <p className="mt-2 text-sm leading-7 text-[#102848]/60">
+                      Add proof that helps people understand your real ability.
+                      Links are better than claims.
+                    </p>
+
+                    <div className="mt-4 grid gap-3">
+                      <input
+                        value={proofTitle}
+                        onChange={(e) => setProofTitle(e.target.value)}
+                        required
+                        placeholder="Example: Portfolio website for a photographer"
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
+
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <select
+                          value={careerCategory}
+                          onChange={(e) => setCareerCategory(e.target.value)}
+                          className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                        >
+                          <option value="TECH_BUILDER">Tech Builder</option>
+                          <option value="CREATIVE_DESIGNER">
+                            Creative Designer
+                          </option>
+                          <option value="VISUAL_MEDIA_CREATOR">
+                            Visual Media Creator
+                          </option>
+                          <option value="CONTENT_DIGITAL_MARKETER">
+                            Content & Digital Marketer
+                          </option>
+                        </select>
+                        <p className="text-xs font-bold text-[#102848]/45 md:col-span-2">
+                          Choose the career family that best matches this proof.
+                        </p>
+                        <select
+                          value={proofType}
+                          onChange={(e) => setProofType(e.target.value)}
+                          className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                        >
+                          <option value="PROJECT">Project</option>
+                          <option value="CASE_STUDY">Case Study</option>
+                          <option value="PORTFOLIO_LINK">Portfolio Link</option>
+                          <option value="CHALLENGE_SUBMISSION">
+                            Challenge Submission
+                          </option>
+                          <option value="COLLABORATION_WORK">
+                            Collaboration Work
+                          </option>
+                        </select>
                       </div>
 
+                      <textarea
+                        value={proofDescription}
+                        onChange={(e) => setProofDescription(e.target.value)}
+                        required
+                        rows={4}
+                        placeholder="Explain the problem, what you did, and what changed because of your work."
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
+
+                      <input
+                        value={proofLink}
+                        onChange={(e) => setProofLink(e.target.value)}
+                        placeholder="GitHub, live website, Behance, YouTube, Google Drive, portfolio link"
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
+
+                      <input
+                        value={toolsUsed}
+                        onChange={(e) => setToolsUsed(e.target.value)}
+                        placeholder="Tools used e.g. Next.js, Figma, Photoshop, Premiere Pro"
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
+
+                      <button
+                        disabled={savingProof}
+                        className="w-fit rounded-xl bg-[#102848] px-5 py-3 text-sm font-black text-white disabled:opacity-40"
+                      >
+                        {savingProof ? "Submitting..." : "Submit proof"}
+                      </button>
+                    </div>
+
+                    {proofMessage && (
+                      <p className="mt-4 text-sm font-bold text-[#102848]/60">
+                        {proofMessage}
+                      </p>
+                    )}
+                  </form>
+                )}
+
+                <div className="mt-4 space-y-4 border-l-2 border-[#0890E0]/25 pl-7">
+                  {proofs.length === 0 ? (
+                    <div className="rounded-[1.5rem] bg-white p-6 shadow-sm ring-1 ring-[#DCE7F2]">
+                      <h3 className="text-lg font-black">
+                        No proof submitted yet
+                      </h3>
                       <p className="mt-3 text-sm leading-7 text-[#102848]/70">
-                        {item.desc}
+                        Your proof ledger is empty. Start with one real thing
+                        you have built, designed, edited, filmed, written,
+                        marketed, or contributed to.
                       </p>
                     </div>
-                  ))}
+                  ) : (
+                    proofs.map((proof) => (
+                      <div
+                        key={proof.id}
+                        className="relative rounded-[1.5rem] bg-white p-6 shadow-sm ring-1 ring-[#DCE7F2]"
+                      >
+                        <span className="absolute -left-[37px] top-7 h-4 w-4 rounded-full bg-[#0890E0]" />
+
+                        <div className="flex flex-col justify-between gap-3 md:flex-row">
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0890E0]">
+                              {proof.careerCategory.replaceAll("_", " ")}
+                            </p>
+
+                            <h3 className="mt-2 text-xl font-black">
+                              {proof.title}
+                            </h3>
+
+                            <p className="mt-2 text-xs font-black uppercase tracking-wide text-[#102848]/40">
+                              {proof.proofType.replaceAll("_", " ")}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <span className="h-fit rounded-full bg-[#EAF3FF] px-4 py-2 text-xs font-black text-[#0890E0]">
+                              {proof.status}
+                            </span>
+
+                            <span className="h-fit rounded-full bg-[#F8FAFC] px-4 py-2 text-xs font-black text-[#102848]/60 ring-1 ring-[#DCE7F2]">
+                              {proof.reviewStatus?.replaceAll("_", " ") ||
+                                "PENDING REVIEW"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="mt-4 text-sm leading-7 text-[#102848]/70">
+                          {proof.description}
+                        </p>
+                        {proof.reviewNotes && (
+                          <div className="mt-4 rounded-2xl bg-[#F8FAFC] px-4 py-3">
+                            <p className="text-xs font-black uppercase tracking-wide text-[#102848]/35">
+                              Review note
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-[#102848]/70">
+                              {proof.reviewNotes}
+                            </p>
+                          </div>
+                        )}
+
+                        {proof.toolsUsed && (
+                          <div className="mt-4 rounded-2xl bg-[#F8FAFC] px-4 py-3">
+                            <p className="text-xs font-black uppercase tracking-wide text-[#102848]/35">
+                              Tools used
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-[#102848]/70">
+                              {proof.toolsUsed}
+                            </p>
+                          </div>
+                        )}
+                        <a
+                          href={`/proofs/${proof.id}`}
+                          className="mt-4 mr-3 inline-flex rounded-full bg-[#0890E0] px-5 py-3 text-sm font-black text-white"
+                        >
+                          View proof details
+                        </a>
+                        {proof.proofLink && (
+                          <a
+                            href={proof.proofLink}
+                            target="_blank"
+                            className="mt-4 inline-flex rounded-full bg-[#102848] px-5 py-3 text-sm font-black text-white"
+                          >
+                            Open proof →
+                          </a>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </section>
 
             <aside className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-[#DFF3FF] p-5 text-center">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl bg-[#DFF3FF] p-4 text-center">
                   <p className="text-2xl font-black">
-                    {profileSaved ? "Active" : "Start"}
+                    {skills.length + proofs.length}
                   </p>
-                  <p className="mt-1 text-xs font-black uppercase tracking-wide">
-                    Profile
+                  <p className="mt-1 text-[10px] font-black uppercase tracking-wide">
+                    Signals
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-[#EAF3FF] p-5 text-center">
+                <div className="rounded-2xl bg-[#EAF3FF] p-4 text-center">
                   <p className="text-2xl font-black">{skills.length}</p>
-                  <p className="mt-1 text-xs font-black uppercase tracking-wide">
+                  <p className="mt-1 text-[10px] font-black uppercase tracking-wide">
                     Skills
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white p-4 text-center ring-1 ring-[#DCE7F2]">
+                  <p className="text-2xl font-black">{proofs.length}</p>
+                  <p className="mt-1 text-[10px] font-black uppercase tracking-wide">
+                    Proofs
                   </p>
                 </div>
               </div>
@@ -348,6 +604,17 @@ export default function DashboardPage() {
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-white/50">
                   Building now
                 </p>
+                <div className="mt-5 rounded-2xl bg-white/5 p-4">
+                  <p className="text-xs font-black uppercase tracking-wide text-white/35">
+                    Current GUMMI status
+                  </p>
+
+                  <p className="mt-2 text-sm font-bold text-white/70">
+                    {proofs.length > 0
+                      ? "Proof activity has started."
+                      : "No proof submitted yet."}
+                  </p>
+                </div>
 
                 <h3 className="mt-4 text-xl font-black">
                   {buildingNow || "Tell people what you are working on"}
@@ -358,7 +625,42 @@ export default function DashboardPage() {
                     "Add a short human story so people understand your work, direction, and ambition."}
                 </p>
               </div>
+              <div className="rounded-[1.5rem] bg-white/90 p-6 shadow-sm ring-1 ring-[#DCE7F2]">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#102848]/45">
+                  Latest proof
+                </p>
 
+                {proofs.length === 0 ? (
+                  <p className="mt-4 text-sm font-bold text-[#102848]/55">
+                    No proof submitted yet.
+                  </p>
+                ) : (
+                  <>
+                    <h3 className="mt-4 text-xl font-black">
+                      {proofs[0].title}
+                    </h3>
+
+                    <p className="mt-2 text-xs font-black uppercase tracking-wide text-[#0890E0]">
+                      {proofs[0].careerCategory.replaceAll("_", " ")} ·{" "}
+                      {proofs[0].proofType.replaceAll("_", " ")}
+                    </p>
+
+                    <p className="mt-3 line-clamp-4 text-sm leading-7 text-[#102848]/60">
+                      {proofs[0].description}
+                    </p>
+
+                    {proofs[0].proofLink && (
+                      <a
+                        href={proofs[0].proofLink}
+                        target="_blank"
+                        className="mt-4 inline-block text-sm font-black text-[#0890E0]"
+                      >
+                        Open proof →
+                      </a>
+                    )}
+                  </>
+                )}
+              </div>
               <div className="rounded-[1.5rem] bg-white/90 p-6 shadow-sm ring-1 ring-[#DCE7F2]">
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-[#102848]/45">
                   Skills

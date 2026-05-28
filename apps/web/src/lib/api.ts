@@ -113,3 +113,57 @@ export async function getUserProfile(userId: string) {
 
   return result;
 }
+export async function createProof(data: {
+  userId: string;
+  title: string;
+  careerCategory: string;
+  proofType: string;
+  description: string;
+  proofLink?: string;
+  mediaUrl?: string;
+  toolsUsed?: string;
+}) {
+  const response = await fetch(`${API_BASE_URL}/api/proofs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to submit proof");
+  }
+
+  return result;
+}
+
+export async function getUserProofs(userId: string) {
+  const response = await fetch(`${API_BASE_URL}/api/proofs/user/${userId}`, {
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to load proofs");
+  }
+
+  return result;
+}
+
+export async function getProofById(proofId: string) {
+  const response = await fetch(`${API_BASE_URL}/api/proofs/${proofId}`, {
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to load proof");
+  }
+
+  return result;
+}
