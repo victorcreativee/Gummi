@@ -26,7 +26,9 @@ public class CreateProofRequest {
     @NotBlank(message = "Description is required")
     @Size(max = 1200, message = "Description is too long")
     private String description;
-
+    private String challenge;
+    private String process;
+    private String outcome;
     private String proofLink;
     private String mediaUrl;
     private String toolsUsed;
@@ -49,6 +51,17 @@ public class CreateProofRequest {
 
     public String getDescription() {
         return description;
+    }
+    public String getChallenge() {
+        return challenge;
+    }
+    
+    public String getProcess() {
+        return process;
+    }
+    
+    public String getOutcome() {
+        return outcome;
     }
 
     public String getProofLink() {

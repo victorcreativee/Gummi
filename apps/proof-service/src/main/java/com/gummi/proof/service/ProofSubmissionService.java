@@ -25,6 +25,9 @@ public class ProofSubmissionService {
         proof.setCareerCategory(request.getCareerCategory());
         proof.setProofType(request.getProofType());
         proof.setDescription(request.getDescription());
+        proof.setChallenge(request.getChallenge());
+        proof.setProcess(request.getProcess());
+        proof.setOutcome(request.getOutcome());
         proof.setProofLink(request.getProofLink());
         proof.setMediaUrl(request.getMediaUrl());
         proof.setToolsUsed(request.getToolsUsed());

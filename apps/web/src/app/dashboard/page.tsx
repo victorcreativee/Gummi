@@ -45,6 +45,9 @@ type ProofSubmission = {
   reviewNotes?: string;
   reviewedBy?: string;
   reviewedAt?: string;
+  challenge?: string;
+  process?: string;
+  outcome?: string;
 };
 export default function DashboardPage() {
   const router = useRouter();
@@ -75,6 +78,9 @@ export default function DashboardPage() {
   const [careerCategory, setCareerCategory] = useState("TECH_BUILDER");
   const [proofType, setProofType] = useState("PROJECT");
   const [proofDescription, setProofDescription] = useState("");
+  const [challenge, setChallenge] = useState("");
+  const [process, setProcess] = useState("");
+  const [outcome, setOutcome] = useState("");
   const [proofLink, setProofLink] = useState("");
   const [toolsUsed, setToolsUsed] = useState("");
 
@@ -216,6 +222,9 @@ export default function DashboardPage() {
         careerCategory,
         proofType,
         description: proofDescription,
+        challenge,
+        process,
+        outcome,
         proofLink,
         toolsUsed,
       });
@@ -229,6 +238,9 @@ export default function DashboardPage() {
       setCareerCategory("TECH_BUILDER");
       setProofType("PROJECT");
       setProofDescription("");
+      setChallenge("");
+      setProcess("");
+      setOutcome("");
       setProofLink("");
       setToolsUsed("");
       setShowProofForm(false);
@@ -290,9 +302,9 @@ export default function DashboardPage() {
         <section className="bg-[radial-gradient(#DCE7F2_0.8px,transparent_0.8px)] bg-[length:18px_18px] p-6">
           <div className="mx-auto grid max-w-7xl gap-6 xl:grid-cols-[1fr_300px]">
             <section>
-              <div className="flex flex-col justify-between gap-6 rounded-[2rem] bg-white/90 p-6 shadow-sm ring-1 ring-[#DCE7F2] md:flex-row md:items-center">
+              <div className="flex flex-col justify-between gap-5 rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-[#DCE7F2] md:flex-row md:items-center">
                 <div className="flex items-center gap-5">
-                  <div className="flex h-28 w-28 items-center justify-center rounded-[2rem] bg-[#0890E0] text-4xl font-black text-white shadow-sm">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-[1.4rem] bg-[#0890E0] text-3xl font-black text-white shadow-sm">
                     {user?.fullName?.[0]?.toUpperCase() || "G"}
                   </div>
 
@@ -330,7 +342,7 @@ export default function DashboardPage() {
 
               <div className="mt-6 rounded-[1.5rem] bg-white/90 p-6 shadow-sm ring-1 ring-[#DCE7F2]">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-black">GUMMI Activity Map</h2>
+                  <h2 className="text-lg font-black">Proffessional activity</h2>
 
                   <div className="flex items-center gap-2 text-sm font-bold text-[#102848]/60">
                     <span>Less</span>
@@ -341,11 +353,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-14 gap-2">
+                <div className="mt-5 grid grid-cols-14 gap-1.5">
                   {Array.from({ length: 98 }).map((_, index) => (
                     <div
                       key={index}
-                      className={`h-4 rounded ${
+                      className={`h-3 rounded ${
                         index % 5 === 0
                           ? "bg-[#0890E0]"
                           : index % 3 === 0
@@ -362,12 +374,11 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-6">
-                <div className="flex items-center justify-between">
+                <div className="mt-6 flex items-end justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-black">Proof Ledger</h2>
+                    <h2 className="text-xl font-black">Proof Ledger</h2>
                     <p className="mt-1 text-sm font-bold text-[#102848]/55">
-                      Submit real work, project links, case studies, or
-                      challenge results.
+                      Work you have submitted as evidence of real skill.
                     </p>
                   </div>
 
@@ -450,7 +461,29 @@ export default function DashboardPage() {
                         placeholder="Explain the problem, what you did, and what changed because of your work."
                         className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
                       />
+                      <textarea
+                        value={challenge}
+                        onChange={(e) => setChallenge(e.target.value)}
+                        rows={3}
+                        placeholder="Challenge: What problem, need, or creative goal were you solving?"
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
 
+                      <textarea
+                        value={process}
+                        onChange={(e) => setProcess(e.target.value)}
+                        rows={4}
+                        placeholder="Process: How did you approach the work? What decisions did you make?"
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
+
+                      <textarea
+                        value={outcome}
+                        onChange={(e) => setOutcome(e.target.value)}
+                        rows={3}
+                        placeholder="Outcome: What changed, improved, shipped, or got delivered?"
+                        className="rounded-xl border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                      />
                       <input
                         value={proofLink}
                         onChange={(e) => setProofLink(e.target.value)}
@@ -574,7 +607,7 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <aside className="space-y-6">
+            <aside className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-2xl bg-[#DFF3FF] p-4 text-center">
                   <p className="text-2xl font-black">

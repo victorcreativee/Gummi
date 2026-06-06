@@ -28,6 +28,14 @@ public class ProofSubmission {
 
     @Column(nullable = false, length = 1200)
     private String description;
+    @Column(length = 1200)
+    private String challenge;
+
+    @Column(length = 1600)
+    private String process;
+
+    @Column(length = 1200)
+    private String outcome;
 
     @Column(length = 500)
     private String proofLink;
@@ -117,6 +125,29 @@ public class ProofSubmission {
 
     public void setDescription(String description) {
         this.description = clean(description);
+    }
+    public String getChallenge() {
+        return challenge;
+    }
+    
+    public void setChallenge(String challenge) {
+        this.challenge = clean(challenge);
+    }
+    
+    public String getProcess() {
+        return process;
+    }
+    
+    public void setProcess(String process) {
+        this.process = clean(process);
+    }
+    
+    public String getOutcome() {
+        return outcome;
+    }
+    
+    public void setOutcome(String outcome) {
+        this.outcome = clean(outcome);
     }
 
     public String getProofLink() {

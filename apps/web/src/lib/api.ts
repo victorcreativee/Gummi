@@ -119,6 +119,9 @@ export async function createProof(data: {
   careerCategory: string;
   proofType: string;
   description: string;
+  challenge?: string;
+  process?: string;
+  outcome?: string;
   proofLink?: string;
   mediaUrl?: string;
   toolsUsed?: string;
