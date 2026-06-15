@@ -86,6 +86,7 @@ export default function DashboardPage() {
   const [outcome, setOutcome] = useState("");
   const [proofLink, setProofLink] = useState("");
   const [toolsUsed, setToolsUsed] = useState("");
+  const [proofFilter, setProofFilter] = useState("ALL");
 
   function getCurrentUserId() {
     return user?.id || user?.userId;
@@ -113,6 +114,24 @@ export default function DashboardPage() {
 
   function getLatestProof() {
     return proofs[0];
+  }
+  function formatProofLabel(value?: string) {
+    if (!value) return "Not set";
+    return value.replaceAll("_", " ").toLowerCase();
+  }
+
+  function getProofState(proof: ProofSubmission) {
+    if (proof.reviewStatus && proof.reviewStatus !== "PENDING") {
+      return proof.reviewStatus;
+    }
+
+    return proof.status || "SUBMITTED";
+  }
+
+  function getFilteredProofs() {
+    if (proofFilter === "ALL") return proofs;
+
+    return proofs.filter((proof) => proof.careerCategory === proofFilter);
   }
 
   useEffect(() => {
@@ -578,44 +597,80 @@ export default function DashboardPage() {
                 )}
 
                 <div>
-                  {proofs.length === 0 ? (
+                  <div className="flex flex-wrap gap-2 border-b border-[#DCE7F2] px-5 py-4">
+                    {[
+                      ["ALL", "All"],
+                      ["TECH_BUILDER", "Tech"],
+                      ["CREATIVE_DESIGNER", "Design"],
+                      ["VISUAL_MEDIA_CREATOR", "Visual"],
+                      ["CONTENT_DIGITAL_MARKETER", "Marketing"],
+                    ].map(([value, label]) => (
+                      <button
+                        key={value}
+                        onClick={() => setProofFilter(value)}
+                        className={`rounded-lg px-3 py-2 text-xs font-black ${
+                          proofFilter === value
+                            ? "bg-[#0890E0] text-white"
+                            : "bg-[#F8FAFC] text-[#102848]/55 ring-1 ring-[#DCE7F2]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {getFilteredProofs().length === 0 ? (
                     <div className="p-6">
-                      <h3 className="text-lg font-black">
-                        No proof submitted yet
-                      </h3>
+                      <h3 className="text-lg font-black">No proof found</h3>
                       <p className="mt-2 text-sm leading-7 text-[#102848]/60">
-                        Start with one real thing you built, designed, edited,
-                        filmed, written, marketed, or contributed to.
+                        Submit real work: a project, case study, sprint result,
+                        design file, video edit, GitHub repo, or live URL.
                       </p>
                     </div>
                   ) : (
-                    proofs.map((proof) => (
+                    getFilteredProofs().map((proof) => (
                       <div
                         key={proof.id}
-                        className="grid gap-4 border-b border-[#DCE7F2] px-5 py-4 last:border-b-0 md:grid-cols-[1fr_160px_140px]"
+                        className="grid gap-4 border-b border-[#DCE7F2] px-5 py-4 last:border-b-0 lg:grid-cols-[1fr_150px_130px_120px]"
                       >
                         <div>
                           <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0890E0]">
-                            {proof.careerCategory.replaceAll("_", " ")}
+                            {formatProofLabel(proof.careerCategory)}
                           </p>
+
                           <h3 className="mt-1 text-base font-black">
                             {proof.title}
                           </h3>
-                          <p className="mt-2 text-sm leading-6 text-[#102848]/60">
+
+                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#102848]/60">
                             {proof.description}
                           </p>
                         </div>
 
-                        <div className="text-sm font-bold text-[#102848]/55">
-                          {proof.proofType.replaceAll("_", " ")}
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#102848]/35">
+                            Proof Type
+                          </p>
+                          <p className="mt-2 text-sm font-bold capitalize text-[#102848]/65">
+                            {formatProofLabel(proof.proofType)}
+                          </p>
                         </div>
 
-                        <div className="flex items-start gap-2 md:justify-end">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#102848]/35">
+                            State
+                          </p>
+                          <span className="mt-2 inline-block rounded-full bg-[#EAF3FF] px-3 py-1.5 text-xs font-black text-[#0890E0]">
+                            {formatProofLabel(getProofState(proof))}
+                          </span>
+                        </div>
+
+                        <div className="flex items-start gap-2 lg:justify-end">
                           <a
                             href={`/proofs/${proof.id}`}
                             className="rounded-lg bg-[#EAF3FF] px-3 py-2 text-xs font-black text-[#0890E0]"
                           >
-                            Details
+                            View
                           </a>
 
                           {proof.proofLink && (

@@ -61,7 +61,7 @@ export default async function ProofDetailPage({
 
             <div className="mt-8 border-b border-[#DCE7F2] pb-8">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0890E0]">
-                Proof case study
+                Proof breakdown
               </p>
 
               <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight">
@@ -89,15 +89,36 @@ export default async function ProofDetailPage({
               {proof.challenge || "No challenge added yet."}
             </Section>
 
-            <Section label="02" title="Approach and execution">
+            <Section label="02" title="How it was built">
               {proof.process || "No process added yet."}
             </Section>
 
             <Section label="03" title="Outcome">
               {proof.outcome || "No outcome added yet."}
             </Section>
+            <Section label="04" title="Execution Timeline">
+              <div className="space-y-5">
+                <div className="border-l-2 border-[#0890E0] pl-4">
+                  <p className="text-xs font-black text-[#0890E0]">
+                    Project Started
+                  </p>
+                  <p className="mt-1 text-sm text-[#102848]/70">
+                    Initial proof submission and execution planning.
+                  </p>
+                </div>
 
-            <Section label="04" title="Verification">
+                <div className="border-l-2 border-[#DCE7F2] pl-4">
+                  <p className="text-xs font-black text-[#102848]/60">
+                    Work In Progress
+                  </p>
+                  <p className="mt-1 text-sm text-[#102848]/70">
+                    Future updates, milestones, commits, designs, and
+                    deliverables will appear here.
+                  </p>
+                </div>
+              </div>
+            </Section>
+            <Section label="05" title="Verification">
               This proof is currently{" "}
               <strong>
                 {proof.reviewStatus?.replaceAll("_", " ") || "PENDING REVIEW"}
