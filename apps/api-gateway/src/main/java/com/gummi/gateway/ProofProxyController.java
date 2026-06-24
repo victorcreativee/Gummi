@@ -2,11 +2,13 @@ package com.gummi.gateway;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/proofs")
@@ -46,11 +48,19 @@ public class ProofProxyController {
                 .retrieve()
                 .body(List.class);
     }
+    @GetMapping("/project/{projectId}")
+    public List getProjectProofs(@PathVariable String projectId) {
+        return restClient.get()
+                .uri(proofServiceUrl + "/api/proofs/project/" + projectId)
+                .retrieve()
+                .body(List.class);
+    }
     @GetMapping("/{proofId}")
     public Map getProofById(@PathVariable String proofId) {
         return restClient.get()
             .uri(proofServiceUrl + "/api/proofs/" + proofId)
             .retrieve()
-            .body(Map.class);
-}
+            .body(Map.class);   
+    }
+    
 }

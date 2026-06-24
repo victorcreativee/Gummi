@@ -41,8 +41,12 @@ public class ProofSubmissionController {
         return proofSubmissionService.getUserProofs(userId);
     }
     @GetMapping("/{proofId}")   
-
     public ProofSubmission getProofById(@PathVariable UUID proofId) {
         return proofSubmissionService.getProofById(proofId);
+    }
+
+    @GetMapping("/project/{projectId}")
+    public List<ProofSubmission> getProjectProofs(@PathVariable UUID projectId) {
+        return proofSubmissionService.getProjectProofs(projectId);
     }
 }

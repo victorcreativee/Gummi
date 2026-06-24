@@ -6,9 +6,11 @@ import WorkspaceTopbar from "../../../components/workspace/WorkspaceTopbar";
 import {
   getProjectById,
   getProjectMembers,
+  getProjectProofs,
   joinProject,
   GummiProject,
   ProjectMember,
+  ProofSubmission,
 } from "../../../lib/api";
 
 type GummiUser = {
@@ -24,6 +26,7 @@ export default function ProjectDetailPage() {
   const [user, setUser] = useState<GummiUser | null>(null);
   const [project, setProject] = useState<GummiProject | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [contributions, setContributions] = useState<ProofSubmission[]>([]);
   const [role, setRole] = useState("Contributor");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -35,10 +38,12 @@ export default function ProjectDetailPage() {
     Promise.all([
       getProjectById(projectId),
       getProjectMembers(projectId).catch(() => []),
+      getProjectProofs(projectId).catch(() => []),
     ])
-      .then(([loadedProject, loadedMembers]) => {
+      .then(([loadedProject, loadedMembers, loadedContributions]) => {
         setProject(loadedProject);
         setMembers(loadedMembers);
+        setContributions(loadedContributions);
       })
       .catch((error) => {
         setMessage(
@@ -140,6 +145,55 @@ export default function ProjectDetailPage() {
                 contribute, and turn execution into visible proof.
               </p>
             </div>
+
+            <div className="mt-10 border-t border-[#DCE7F2] pt-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                    Contributions
+                  </p>
+                  <h2 className="mt-2 text-xl font-black">
+                    Proof submitted for this project
+                  </h2>
+                </div>
+
+                <a
+                  href={`/projects/${projectId}/contribute`}
+                  className="rounded-xl bg-[#0890E0] px-4 py-3 text-sm font-black text-white"
+                >
+                  Submit contribution
+                </a>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                {contributions.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-[#DCE7F2] bg-[#F8FAFC] p-6">
+                    <p className="text-sm font-bold text-[#102848]/55">
+                      No contributions yet. When collaborators submit proof for
+                      this project, it will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  contributions.map((proof) => (
+                    <a
+                      key={proof.id}
+                      href={`/proofs/${proof.id}`}
+                      className="block rounded-2xl border border-[#DCE7F2] bg-[#F8FAFC] p-5 transition hover:border-[#0890E0]"
+                    >
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0890E0]">
+                        {proof.proofType || "Contribution"}
+                      </p>
+
+                      <h3 className="mt-2 text-lg font-black">{proof.title}</h3>
+
+                      <p className="mt-2 line-clamp-2 text-sm font-bold leading-6 text-[#102848]/60">
+                        {proof.description}
+                      </p>
+                    </a>
+                  ))
+                )}
+              </div>
+            </div>
           </article>
 
           <aside className="space-y-5">
@@ -161,6 +215,13 @@ export default function ProjectDetailPage() {
               >
                 Join as collaborator
               </button>
+
+              <a
+                href={`/projects/${projectId}/contribute`}
+                className="mt-3 block rounded-xl border border-[#DCE7F2] bg-white px-5 py-3 text-center text-sm font-black text-[#102848]"
+              >
+                Submit contribution
+              </a>
 
               {message && (
                 <p className="mt-3 text-sm font-bold text-[#102848]/60">

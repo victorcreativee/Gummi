@@ -14,6 +14,7 @@ public class ProofSubmission {
 
     @Column(nullable = false)
     private UUID userId;
+    private UUID projectId;
 
     @Column(nullable = false, length = 160)
     private String title;
@@ -93,6 +94,14 @@ public class ProofSubmission {
 
     public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public UUID getProjectId() {
+        return projectId;
+    }
+    
+    public void setProjectId(UUID projectId) {
+        this.projectId = projectId;
     }
 
     public String getTitle() {

@@ -12,6 +12,7 @@ public class CreateProofRequest {
 
     @NotNull(message = "User ID is required")
     private UUID userId;
+    private UUID projectId; 
 
     @NotBlank(message = "Title is required")
     @Size(max = 160, message = "Title is too long")
@@ -36,7 +37,9 @@ public class CreateProofRequest {
     public UUID getUserId() {
         return userId;
     }
-
+    public UUID getProjectId() {
+        return projectId;
+    }
     public String getTitle() {
         return title;
     }

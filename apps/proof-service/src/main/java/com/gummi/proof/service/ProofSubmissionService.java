@@ -21,6 +21,7 @@ public class ProofSubmissionService {
         ProofSubmission proof = new ProofSubmission();
 
         proof.setUserId(request.getUserId());
+        proof.setProjectId(request.getProjectId());
         proof.setTitle(request.getTitle());
         proof.setCareerCategory(request.getCareerCategory());
         proof.setProofType(request.getProofType());
@@ -42,6 +43,9 @@ public class ProofSubmissionService {
     public ProofSubmission getProofById(UUID proofId) {
         return proofSubmissionRepository.findById(proofId)
                 .orElseThrow(() -> new RuntimeException("Proof not found"));
+    }
+    public List<ProofSubmission> getProjectProofs(UUID projectId) {
+        return proofSubmissionRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
     }
     
 }

@@ -19,7 +19,24 @@ export type ProjectMember = {
   role: string;
   joinedAt: string;
 };
-
+export type ProofSubmission = {
+  id: string;
+  userId: string;
+  projectId?: string;
+  title: string;
+  careerCategory: string;
+  proofType: string;
+  description: string;
+  challenge?: string;
+  process?: string;
+  outcome?: string;
+  proofLink?: string;
+  mediaUrl?: string;
+  toolsUsed?: string;
+  status?: string;
+  reviewStatus?: string;
+  createdAt?: string;
+};
 export async function createProject(projectData: {
   ownerId: string;
   title: string;
@@ -221,6 +238,7 @@ export async function getUserProfile(userId: string) {
 
 export async function createProof(data: {
   userId: string;
+  projectId?: string;
   title: string;
   careerCategory: string;
   proofType: string;
@@ -272,6 +290,24 @@ export async function getProofById(proofId: string) {
 
   if (!response.ok) {
     throw new Error(result.message || "Failed to load proof");
+  }
+
+  return result;
+}
+export async function getProjectProofs(
+  projectId: string
+): Promise<ProofSubmission[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/proofs/project/${projectId}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to load project contributions");
   }
 
   return result;
