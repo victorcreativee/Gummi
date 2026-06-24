@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: gummi_db
       POSTGRES_USER: gummi_user
       POSTGRES_PASSWORD: gummi_password
+      POSTGRES_MULTIPLE_DATABASES: gummi_auth_db,gummi_talent_db,gummi_user_db,gummi_proof_db,gummi_project_db
     ports:
       - "5433:5432"
     volumes:
