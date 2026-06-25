@@ -20,8 +20,8 @@ export default function ProjectContributionPage() {
   const [project, setProject] = useState<GummiProject | null>(null);
 
   const [title, setTitle] = useState("");
-  const [careerCategory, setCareerCategory] = useState("SOFTWARE");
-  const [proofType, setProofType] = useState("PROJECT_CONTRIBUTION");
+  const [careerCategory, setCareerCategory] = useState("TECH_BUILDER");
+  const [proofType] = useState("COLLABORATION_WORK");
   const [description, setDescription] = useState("");
   const [challenge, setChallenge] = useState("");
   const [process, setProcess] = useState("");
@@ -127,12 +127,12 @@ export default function ProjectContributionPage() {
               onChange={(event) => setCareerCategory(event.target.value)}
               className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
             >
-              <option value="SOFTWARE">Software</option>
-              <option value="DESIGN">Design</option>
-              <option value="MARKETING">Marketing</option>
-              <option value="RESEARCH">Research</option>
-              <option value="MEDIA">Media</option>
-              <option value="BUSINESS">Business</option>
+              <option value="TECH_BUILDER">Tech Builder</option>
+              <option value="CREATIVE_DESIGNER">Creative Designer</option>
+              <option value="VISUAL_MEDIA_CREATOR">Visual Media Creator</option>
+              <option value="CONTENT_DIGITAL_MARKETER">
+                Content / Digital Marketer
+              </option>
             </select>
 
             <input

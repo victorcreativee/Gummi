@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface ProofSubmissionRepository extends JpaRepository<ProofSubmission, UUID> {
     List<ProofSubmission> findByUserIdOrderByCreatedAtDesc(UUID userId);
-    List<ProofSubmission> findByProjectIdOrderByCreatedAtDesc(UUID projectId);
+    List<ProofSubmission> findByProjectId(UUID projectId);
 }

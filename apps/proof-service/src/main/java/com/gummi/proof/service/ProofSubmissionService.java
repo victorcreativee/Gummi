@@ -45,7 +45,7 @@ public class ProofSubmissionService {
                 .orElseThrow(() -> new RuntimeException("Proof not found"));
     }
     public List<ProofSubmission> getProjectProofs(UUID projectId) {
-        return proofSubmissionRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
+        return proofSubmissionRepository.findByProjectId(projectId);
     }
     
 }

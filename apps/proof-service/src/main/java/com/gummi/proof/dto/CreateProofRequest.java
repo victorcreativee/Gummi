@@ -40,6 +40,9 @@ public class CreateProofRequest {
     public UUID getProjectId() {
         return projectId;
     }
+    public void setProjectId(UUID projectId) {
+        this.projectId = projectId;
+    }
     public String getTitle() {
         return title;
     }
