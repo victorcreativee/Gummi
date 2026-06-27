@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -67,6 +68,29 @@ public class ProjectProxyController {
                 Object.class
         );
 
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/{projectId}/milestones")
+    public ResponseEntity<Object> createMilestone(
+            @PathVariable UUID projectId,
+            @RequestBody Map<String, Object> request
+    ) {
+        Object response = restTemplate.postForObject(
+                projectServiceUrl + "/projects/" + projectId + "/milestones",
+                request,
+                Object.class
+        );
+    
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{projectId}/milestones")
+    public ResponseEntity<Object> getMilestones(@PathVariable UUID projectId) {
+        Object response = restTemplate.getForObject(
+                projectServiceUrl + "/projects/" + projectId + "/milestones",
+                Object.class
+        );
+    
         return ResponseEntity.ok(response);
     }
 }

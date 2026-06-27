@@ -11,6 +11,8 @@ import {
   getUserProofs,
 } from "../../lib/api";
 import WorkspaceTopbar from "../../components/workspace/WorkspaceTopbar";
+import JourneyStatCard from "../../components/journey/JourneyStatCard";
+import JourneyActionCard from "../../components/journey/JourneyActionCard";
 
 type GummiUser = {
   id?: string;
@@ -51,6 +53,14 @@ type ProofSubmission = {
   outcome?: string;
 };
 
+const journeySections = [
+  "Today",
+  "Proof of Work",
+  "Skills",
+  "Trust",
+  "Profile",
+];
+
 export default function DashboardPage() {
   const router = useRouter();
 
@@ -61,7 +71,7 @@ export default function DashboardPage() {
   const [customSkill, setCustomSkill] = useState("");
   const [skillMessage, setSkillMessage] = useState("");
   const [savingSkill, setSavingSkill] = useState(false);
-  const [activeSection, setActiveSection] = useState("Overview");
+  const [activeSection, setActiveSection] = useState("Today");
 
   const [headline, setHeadline] = useState("");
   const [location, setLocation] = useState("");
@@ -70,7 +80,6 @@ export default function DashboardPage() {
   const [story, setStory] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
-  const [editingProfile, setEditingProfile] = useState(false);
 
   const [proofs, setProofs] = useState<ProofSubmission[]>([]);
   const [showProofForm, setShowProofForm] = useState(false);
@@ -88,10 +97,17 @@ export default function DashboardPage() {
   const [toolsUsed, setToolsUsed] = useState("");
   const [proofFilter, setProofFilter] = useState("ALL");
 
+  const isTodaySection = activeSection === "Today";
+  const isProofSection = activeSection === "Proof of Work";
+  const isSkillsSection = activeSection === "Skills";
+  const isTrustSection = activeSection === "Trust";
+  const isProfileSection = activeSection === "Profile";
+
   function getCurrentUserId() {
     return user?.id || user?.userId;
   }
-  function formatLabel(value?: string) {
+
+  function formatProofLabel(value?: string) {
     if (!value) return "Not set";
     return value.replaceAll("_", " ").toLowerCase();
   }
@@ -110,14 +126,6 @@ export default function DashboardPage() {
     }, 0);
 
     return Math.round(total / proofs.length);
-  }
-
-  function getLatestProof() {
-    return proofs[0];
-  }
-  function formatProofLabel(value?: string) {
-    if (!value) return "Not set";
-    return value.replaceAll("_", " ").toLowerCase();
   }
 
   function getProofState(proof: ProofSubmission) {
@@ -163,9 +171,6 @@ export default function DashboardPage() {
           setAvailability(loadedProfile.availability || "");
           setBuildingNow(loadedProfile.buildingNow || "");
           setStory(loadedProfile.story || "");
-          setEditingProfile(false);
-        } else {
-          setEditingProfile(true);
         }
       })
       .finally(() => setCheckingAuth(false));
@@ -183,6 +188,7 @@ export default function DashboardPage() {
         userId: currentUserId,
         skillName,
       });
+
       setSkills((current) => [savedSkill, ...current]);
       setSkillMessage(`${skillName} added.`);
     } catch (error) {
@@ -224,7 +230,6 @@ export default function DashboardPage() {
       });
 
       setProfileMessage("Profile saved.");
-      setEditingProfile(false);
     } catch (error) {
       setProfileMessage(
         error instanceof Error ? error.message : "Could not save profile"
@@ -283,7 +288,7 @@ export default function DashboardPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC] text-[#102848]">
         <p className="text-sm font-bold text-[#102848]/60">
-          Opening your GUMMI workspace...
+          Opening your GUMMI journey...
         </p>
       </main>
     );
@@ -294,7 +299,10 @@ export default function DashboardPage() {
       <WorkspaceTopbar
         fullName={user?.fullName}
         userId={getCurrentUserId()}
-        onNewProof={() => setShowProofForm(true)}
+        onNewProof={() => {
+          setActiveSection("Proof of Work");
+          setShowProofForm(true);
+        }}
       />
 
       <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 lg:grid-cols-[248px_1fr]">
@@ -306,21 +314,13 @@ export default function DashboardPage() {
             <div>
               <p className="text-sm font-black">GUMMI</p>
               <p className="text-xs font-bold text-[#102848]/45">
-                Builder workspace
+                Member journey
               </p>
             </div>
           </div>
 
           <nav className="mt-8 space-y-1">
-            {[
-              "Overview",
-              "Proof-of-Work",
-              "Case Studies",
-              "Execution Logs",
-              "Skills",
-              "Collaborations",
-              "Verification",
-            ].map((item) => (
+            {journeySections.map((item) => (
               <button
                 key={item}
                 onClick={() => setActiveSection(item)}
@@ -344,7 +344,7 @@ export default function DashboardPage() {
                 {proofs.length + skills.length}
               </p>
               <p className="text-xs font-bold text-[#102848]/45">
-                signals collected
+                growth records
               </p>
             </div>
           </div>
@@ -360,12 +360,13 @@ export default function DashboardPage() {
                       {activeSection}
                     </p>
                     <h1 className="mt-3 text-3xl font-black">
-                      {user?.fullName || "GUMMI Builder"}
+                      {user?.fullName || "GUMMI Member"}
                     </h1>
                     <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-[#102848]/60">
                       {headline ||
                         "Complete your profile so your work can speak clearly."}
                     </p>
+
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="rounded-full bg-[#EAF3FF] px-3 py-1.5 text-xs font-black text-[#0890E0]">
                         {location || "Location not added"}
@@ -384,316 +385,506 @@ export default function DashboardPage() {
                       Public profile
                     </a>
                     <button
-                      onClick={() => setEditingProfile(true)}
+                      onClick={() => setActiveSection("Profile")}
                       className="rounded-xl bg-[#102848] px-4 py-2.5 text-sm font-black text-white"
                     >
-                      Edit
+                      Edit profile
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-4">
-                <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#102848]/35">
-                    Submitted Proof
-                  </p>
-                  <p className="mt-3 text-3xl font-black">{proofs.length}</p>
-                  <p className="mt-1 text-xs font-bold text-[#102848]/45">
-                    real work records
-                  </p>
-                </div>
-
-                <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#102848]/35">
-                    Skills Claimed
-                  </p>
-                  <p className="mt-3 text-3xl font-black">{skills.length}</p>
-                  <p className="mt-1 text-xs font-bold text-[#102848]/45">
-                    builder capabilities
-                  </p>
-                </div>
-
-                <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#102848]/35">
-                    Reviewed
-                  </p>
-                  <p className="mt-3 text-3xl font-black">
-                    {getReviewedProofsCount()}
-                  </p>
-                  <p className="mt-1 text-xs font-bold text-[#102848]/45">
-                    checked signals
-                  </p>
-                </div>
-
-                <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#102848]/35">
-                    Trust Score
-                  </p>
-                  <p className="mt-3 text-3xl font-black">
-                    {getAverageVerificationScore()}
-                  </p>
-                  <p className="mt-1 text-xs font-bold text-[#102848]/45">
-                    average verification
-                  </p>
-                </div>
-              </div>
-
-              <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-black">Professional activity</h2>
-                  <p className="text-xs font-bold text-[#102848]/45">
-                    Proof activity map
-                  </p>
-                </div>
-
-                <div
-                  className="mt-5 grid gap-1"
-                  style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}
-                >
-                  {Array.from({ length: 98 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-3 ${
-                        index % 5 === 0
-                          ? "bg-[#0890E0]"
-                          : index % 3 === 0
-                          ? "bg-[#72C7F4]"
-                          : "bg-[#DCE7F2]"
-                      }`}
+              {isTodaySection && (
+                <>
+                  <div className="grid gap-5 md:grid-cols-4">
+                    <JourneyStatCard
+                      label="Proof of Work"
+                      value={proofs.length}
+                      note="real work shared"
                     />
-                  ))}
-                </div>
-              </div>
 
-              <div className="border border-[#DCE7F2] bg-white/95 shadow-sm">
-                <div className="flex items-center justify-between border-b border-[#DCE7F2] px-5 py-4">
-                  <div>
-                    <h2 className="text-lg font-black">Proof-of-Work Ledger</h2>
-                    <p className="text-sm font-bold text-[#102848]/50">
-                      Every project, sprint, case study, and execution signal
-                      you submit.
-                    </p>
+                    <JourneyStatCard
+                      label="Skills"
+                      value={skills.length}
+                      note="areas you are growing"
+                    />
+
+                    <JourneyStatCard
+                      label="Reviewed Work"
+                      value={getReviewedProofsCount()}
+                      note="feedback received"
+                    />
+
+                    <JourneyStatCard
+                      label="Trust Profile"
+                      value={getAverageVerificationScore()}
+                      note="based on reviewed work"
+                    />
                   </div>
 
-                  <button
-                    onClick={() => setShowProofForm((current) => !current)}
-                    className="rounded-xl bg-[#0890E0] px-4 py-2.5 text-sm font-black text-white"
-                  >
-                    {showProofForm ? "Close" : "Submit proof"}
-                  </button>
-                </div>
-
-                {showProofForm && (
-                  <form
-                    onSubmit={handleCreateProof}
-                    className="border-b border-[#DCE7F2] p-5"
-                  >
-                    <div className="grid gap-3">
-                      <input
-                        value={proofTitle}
-                        onChange={(e) => setProofTitle(e.target.value)}
-                        required
-                        placeholder="Proof title"
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
-                      />
-
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <select
-                          value={careerCategory}
-                          onChange={(e) => setCareerCategory(e.target.value)}
-                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                        >
-                          <option value="TECH_BUILDER">Tech Builder</option>
-                          <option value="CREATIVE_DESIGNER">
-                            Creative Designer
-                          </option>
-                          <option value="VISUAL_MEDIA_CREATOR">
-                            Visual Creator
-                          </option>
-                          <option value="CONTENT_DIGITAL_MARKETER">
-                            Marketing & Content
-                          </option>
-                        </select>
-
-                        <select
-                          value={proofType}
-                          onChange={(e) => setProofType(e.target.value)}
-                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                        >
-                          <option value="PROJECT">Project</option>
-                          <option value="CASE_STUDY">Case Study</option>
-                          <option value="PORTFOLIO_LINK">Portfolio Link</option>
-                          <option value="CHALLENGE_SUBMISSION">
-                            Challenge Submission
-                          </option>
-                          <option value="COLLABORATION_WORK">
-                            Collaboration Work
-                          </option>
-                        </select>
-                      </div>
-
-                      <textarea
-                        value={proofDescription}
-                        onChange={(e) => setProofDescription(e.target.value)}
-                        required
-                        rows={3}
-                        placeholder="What did you do?"
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                      />
-
-                      <textarea
-                        value={challenge}
-                        onChange={(e) => setChallenge(e.target.value)}
-                        rows={2}
-                        placeholder="Challenge"
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                      />
-
-                      <textarea
-                        value={process}
-                        onChange={(e) => setProcess(e.target.value)}
-                        rows={3}
-                        placeholder="Approach / execution"
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                      />
-
-                      <textarea
-                        value={outcome}
-                        onChange={(e) => setOutcome(e.target.value)}
-                        rows={2}
-                        placeholder="Outcome"
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                      />
-
-                      <input
-                        value={proofLink}
-                        onChange={(e) => setProofLink(e.target.value)}
-                        placeholder="GitHub, live URL, Behance, YouTube, Drive..."
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                      />
-
-                      <input
-                        value={toolsUsed}
-                        onChange={(e) => setToolsUsed(e.target.value)}
-                        placeholder="Tools used"
-                        className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
-                      />
-
-                      <button
-                        disabled={savingProof}
-                        className="w-fit rounded-xl bg-[#102848] px-5 py-3 text-sm font-black text-white disabled:opacity-40"
-                      >
-                        {savingProof ? "Submitting..." : "Submit proof"}
-                      </button>
+                  <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-black">Growth activity</h2>
+                      <p className="text-xs font-bold text-[#102848]/45">
+                        Work and learning rhythm
+                      </p>
                     </div>
 
-                    {proofMessage && (
-                      <p className="mt-4 text-sm font-bold text-[#102848]/60">
-                        {proofMessage}
-                      </p>
-                    )}
-                  </form>
-                )}
+                    <div
+                      className="mt-5 grid gap-1"
+                      style={{
+                        gridTemplateColumns: "repeat(14, minmax(0, 1fr))",
+                      }}
+                    >
+                      {Array.from({ length: 98 }).map((_, index) => (
+                        <div
+                          key={index}
+                          className={`h-3 ${
+                            index % 5 === 0
+                              ? "bg-[#0890E0]"
+                              : index % 3 === 0
+                              ? "bg-[#72C7F4]"
+                              : "bg-[#DCE7F2]"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
 
-                <div>
-                  <div className="flex flex-wrap gap-2 border-b border-[#DCE7F2] px-5 py-4">
+                  <div className="border border-[#DCE7F2] bg-white/95 p-6 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                      Next steps
+                    </p>
+                    <h2 className="mt-3 text-2xl font-black">
+                      What should you do next?
+                    </h2>
+
+                    <div className="mt-5 grid gap-3 md:grid-cols-3">
+                      <JourneyActionCard
+                        title="Share proof"
+                        description="Add real work you completed."
+                        onClick={() => {
+                          setActiveSection("Proof of Work");
+                          setShowProofForm(true);
+                        }}
+                      />
+
+                      <JourneyActionCard
+                        title="Add skills"
+                        description="Show what you are growing in."
+                        onClick={() => setActiveSection("Skills")}
+                      />
+
+                      <JourneyActionCard
+                        title="Complete profile"
+                        description="Tell people your direction."
+                        onClick={() => setActiveSection("Profile")}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {(isTodaySection || isProofSection) && (
+                <div className="border border-[#DCE7F2] bg-white/95 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-[#DCE7F2] px-5 py-4">
+                    <div>
+                      <h2 className="text-lg font-black">Proof of Work</h2>
+                      <p className="text-sm font-bold text-[#102848]/50">
+                        Every project, challenge, case study, and meaningful
+                        piece of work you share.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setShowProofForm((current) => !current)}
+                      className="rounded-xl bg-[#0890E0] px-4 py-2.5 text-sm font-black text-white"
+                    >
+                      {showProofForm ? "Close" : "Submit proof"}
+                    </button>
+                  </div>
+
+                  {showProofForm && (
+                    <form
+                      onSubmit={handleCreateProof}
+                      className="border-b border-[#DCE7F2] p-5"
+                    >
+                      <div className="grid gap-3">
+                        <input
+                          value={proofTitle}
+                          onChange={(e) => setProofTitle(e.target.value)}
+                          required
+                          placeholder="Proof title"
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                        />
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <select
+                            value={careerCategory}
+                            onChange={(e) => setCareerCategory(e.target.value)}
+                            className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                          >
+                            <option value="TECH_BUILDER">
+                              Technology Member
+                            </option>
+                            <option value="CREATIVE_DESIGNER">
+                              Creative Designer
+                            </option>
+                            <option value="VISUAL_MEDIA_CREATOR">
+                              Visual Creator
+                            </option>
+                            <option value="CONTENT_DIGITAL_MARKETER">
+                              Marketing & Content
+                            </option>
+                          </select>
+
+                          <select
+                            value={proofType}
+                            onChange={(e) => setProofType(e.target.value)}
+                            className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                          >
+                            <option value="PROJECT">Project</option>
+                            <option value="CASE_STUDY">Case Study</option>
+                            <option value="PORTFOLIO_LINK">
+                              Portfolio Link
+                            </option>
+                            <option value="CHALLENGE_SUBMISSION">
+                              Challenge Submission
+                            </option>
+                            <option value="COLLABORATION_WORK">
+                              Collaboration Work
+                            </option>
+                          </select>
+                        </div>
+
+                        <textarea
+                          value={proofDescription}
+                          onChange={(e) => setProofDescription(e.target.value)}
+                          required
+                          rows={3}
+                          placeholder="What did you do?"
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                        />
+
+                        <textarea
+                          value={challenge}
+                          onChange={(e) => setChallenge(e.target.value)}
+                          rows={2}
+                          placeholder="Challenge"
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                        />
+
+                        <textarea
+                          value={process}
+                          onChange={(e) => setProcess(e.target.value)}
+                          rows={3}
+                          placeholder="Approach / execution"
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                        />
+
+                        <textarea
+                          value={outcome}
+                          onChange={(e) => setOutcome(e.target.value)}
+                          rows={2}
+                          placeholder="Outcome"
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                        />
+
+                        <input
+                          value={proofLink}
+                          onChange={(e) => setProofLink(e.target.value)}
+                          placeholder="GitHub, live URL, Behance, YouTube, Drive..."
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                        />
+
+                        <input
+                          value={toolsUsed}
+                          onChange={(e) => setToolsUsed(e.target.value)}
+                          placeholder="Tools used"
+                          className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none"
+                        />
+
+                        <button
+                          disabled={savingProof}
+                          className="w-fit rounded-xl bg-[#102848] px-5 py-3 text-sm font-black text-white disabled:opacity-40"
+                        >
+                          {savingProof ? "Submitting..." : "Submit proof"}
+                        </button>
+                      </div>
+
+                      {proofMessage && (
+                        <p className="mt-4 text-sm font-bold text-[#102848]/60">
+                          {proofMessage}
+                        </p>
+                      )}
+                    </form>
+                  )}
+
+                  <div>
+                    <div className="flex flex-wrap gap-2 border-b border-[#DCE7F2] px-5 py-4">
+                      {[
+                        ["ALL", "All"],
+                        ["TECH_BUILDER", "Tech"],
+                        ["CREATIVE_DESIGNER", "Design"],
+                        ["VISUAL_MEDIA_CREATOR", "Visual"],
+                        ["CONTENT_DIGITAL_MARKETER", "Marketing"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          onClick={() => setProofFilter(value)}
+                          className={`rounded-lg px-3 py-2 text-xs font-black ${
+                            proofFilter === value
+                              ? "bg-[#0890E0] text-white"
+                              : "bg-[#F8FAFC] text-[#102848]/55 ring-1 ring-[#DCE7F2]"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {getFilteredProofs().length === 0 ? (
+                      <div className="p-6">
+                        <h3 className="text-lg font-black">No proof found</h3>
+                        <p className="mt-2 text-sm leading-7 text-[#102848]/60">
+                          Start by sharing one real piece of work: a project,
+                          case study, design file, video edit, GitHub repo,
+                          writing sample, or live URL.
+                        </p>
+                      </div>
+                    ) : (
+                      getFilteredProofs().map((proof) => (
+                        <div
+                          key={proof.id}
+                          className="grid gap-4 border-b border-[#DCE7F2] px-5 py-4 last:border-b-0 lg:grid-cols-[1fr_150px_130px_120px]"
+                        >
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0890E0]">
+                              {formatProofLabel(proof.careerCategory)}
+                            </p>
+
+                            <h3 className="mt-1 text-base font-black">
+                              {proof.title}
+                            </h3>
+
+                            <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#102848]/60">
+                              {proof.description}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#102848]/35">
+                              Proof Type
+                            </p>
+                            <p className="mt-2 text-sm font-bold capitalize text-[#102848]/65">
+                              {formatProofLabel(proof.proofType)}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#102848]/35">
+                              State
+                            </p>
+                            <span className="mt-2 inline-block rounded-full bg-[#EAF3FF] px-3 py-1.5 text-xs font-black text-[#0890E0]">
+                              {formatProofLabel(getProofState(proof))}
+                            </span>
+                          </div>
+
+                          <div className="flex items-start gap-2 lg:justify-end">
+                            <a
+                              href={`/proofs/${proof.id}`}
+                              className="rounded-lg bg-[#EAF3FF] px-3 py-2 text-xs font-black text-[#0890E0]"
+                            >
+                              View
+                            </a>
+
+                            {proof.proofLink && (
+                              <a
+                                href={proof.proofLink}
+                                target="_blank"
+                                className="rounded-lg bg-[#102848] px-3 py-2 text-xs font-black text-white"
+                              >
+                                Open
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isSkillsSection && (
+                <div className="border border-[#DCE7F2] bg-white/95 p-6 shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                    Skills
+                  </p>
+                  <h2 className="mt-3 text-2xl font-black">
+                    What you are growing in
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-[#102848]/60">
+                    Add the skills you are practicing. Later, GUMMI will connect
+                    these skills to challenges, projects, proof of work, and
+                    opportunities.
+                  </p>
+
+                  <form
+                    onSubmit={handleCustomSkillSubmit}
+                    className="mt-6 flex gap-2"
+                  >
+                    <input
+                      value={customSkill}
+                      onChange={(e) => setCustomSkill(e.target.value)}
+                      placeholder="Add a skill e.g. UI Design, Java, Video Editing"
+                      className="min-w-0 flex-1 border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                    />
+                    <button
+                      disabled={savingSkill}
+                      className="rounded-xl bg-[#0890E0] px-5 py-3 text-sm font-black text-white disabled:opacity-40"
+                    >
+                      {savingSkill ? "Adding..." : "Add skill"}
+                    </button>
+                  </form>
+
+                  {skillMessage && (
+                    <p className="mt-3 text-sm font-bold text-[#102848]/55">
+                      {skillMessage}
+                    </p>
+                  )}
+
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {skills.length === 0 ? (
+                      <p className="text-sm font-bold text-[#102848]/50">
+                        No skills added yet.
+                      </p>
+                    ) : (
+                      skills.map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="rounded-full bg-[#F8FAFC] px-4 py-2 text-sm font-black text-[#102848]/65 ring-1 ring-[#DCE7F2]"
+                        >
+                          {skill.skillName}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isTrustSection && (
+                <div className="border border-[#DCE7F2] bg-white/95 p-6 shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                    Trust
+                  </p>
+                  <h2 className="mt-3 text-2xl font-black">
+                    How trust is growing
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-[#102848]/60">
+                    Trust on GUMMI grows through real work, feedback,
+                    consistency, collaboration, and integrity.
+                  </p>
+
+                  <div className="mt-6 grid gap-4 md:grid-cols-2">
                     {[
-                      ["ALL", "All"],
-                      ["TECH_BUILDER", "Tech"],
-                      ["CREATIVE_DESIGNER", "Design"],
-                      ["VISUAL_MEDIA_CREATOR", "Visual"],
-                      ["CONTENT_DIGITAL_MARKETER", "Marketing"],
-                    ].map(([value, label]) => (
-                      <button
-                        key={value}
-                        onClick={() => setProofFilter(value)}
-                        className={`rounded-lg px-3 py-2 text-xs font-black ${
-                          proofFilter === value
-                            ? "bg-[#0890E0] text-white"
-                            : "bg-[#F8FAFC] text-[#102848]/55 ring-1 ring-[#DCE7F2]"
-                        }`}
+                      ["Capability", `${proofs.length} proof records shared`],
+                      ["Consistency", "Keep sharing real work over time"],
+                      [
+                        "Feedback",
+                        `${getReviewedProofsCount()} reviewed items`,
+                      ],
+                      ["Growth", `${skills.length} skills being developed`],
+                    ].map(([title, description]) => (
+                      <div
+                        key={title}
+                        className="rounded-2xl border border-[#DCE7F2] bg-[#F8FAFC] p-5"
                       >
-                        {label}
-                      </button>
+                        <h3 className="text-base font-black">{title}</h3>
+                        <p className="mt-2 text-sm font-bold leading-6 text-[#102848]/55">
+                          {description}
+                        </p>
+                      </div>
                     ))}
                   </div>
-
-                  {getFilteredProofs().length === 0 ? (
-                    <div className="p-6">
-                      <h3 className="text-lg font-black">No proof found</h3>
-                      <p className="mt-2 text-sm leading-7 text-[#102848]/60">
-                        Submit real work: a project, case study, sprint result,
-                        design file, video edit, GitHub repo, or live URL.
-                      </p>
-                    </div>
-                  ) : (
-                    getFilteredProofs().map((proof) => (
-                      <div
-                        key={proof.id}
-                        className="grid gap-4 border-b border-[#DCE7F2] px-5 py-4 last:border-b-0 lg:grid-cols-[1fr_150px_130px_120px]"
-                      >
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0890E0]">
-                            {formatProofLabel(proof.careerCategory)}
-                          </p>
-
-                          <h3 className="mt-1 text-base font-black">
-                            {proof.title}
-                          </h3>
-
-                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#102848]/60">
-                            {proof.description}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#102848]/35">
-                            Proof Type
-                          </p>
-                          <p className="mt-2 text-sm font-bold capitalize text-[#102848]/65">
-                            {formatProofLabel(proof.proofType)}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#102848]/35">
-                            State
-                          </p>
-                          <span className="mt-2 inline-block rounded-full bg-[#EAF3FF] px-3 py-1.5 text-xs font-black text-[#0890E0]">
-                            {formatProofLabel(getProofState(proof))}
-                          </span>
-                        </div>
-
-                        <div className="flex items-start gap-2 lg:justify-end">
-                          <a
-                            href={`/proofs/${proof.id}`}
-                            className="rounded-lg bg-[#EAF3FF] px-3 py-2 text-xs font-black text-[#0890E0]"
-                          >
-                            View
-                          </a>
-
-                          {proof.proofLink && (
-                            <a
-                              href={proof.proofLink}
-                              target="_blank"
-                              className="rounded-lg bg-[#102848] px-3 py-2 text-xs font-black text-white"
-                            >
-                              Open
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  )}
                 </div>
-              </div>
+              )}
+
+              {isProfileSection && (
+                <form
+                  onSubmit={handleSaveProfile}
+                  className="border border-[#DCE7F2] bg-white/95 p-6 shadow-sm"
+                >
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                    Profile
+                  </p>
+                  <h2 className="mt-3 text-2xl font-black">
+                    Tell people where you are going
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-[#102848]/60">
+                    Your profile should help members, experts, and organizations
+                    understand your direction, your story, and what you are
+                    working on.
+                  </p>
+
+                  <div className="mt-6 grid gap-3">
+                    <input
+                      value={headline}
+                      onChange={(e) => setHeadline(e.target.value)}
+                      placeholder="Headline e.g. Frontend developer learning product design"
+                      className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                    />
+
+                    <input
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="Location"
+                      className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                    />
+
+                    <input
+                      value={availability}
+                      onChange={(e) => setAvailability(e.target.value)}
+                      placeholder="Availability e.g. Open to projects"
+                      className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                    />
+
+                    <textarea
+                      value={buildingNow}
+                      onChange={(e) => setBuildingNow(e.target.value)}
+                      placeholder="What are you working on now?"
+                      rows={3}
+                      className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                    />
+
+                    <textarea
+                      value={story}
+                      onChange={(e) => setStory(e.target.value)}
+                      placeholder="Your story"
+                      rows={5}
+                      className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                    />
+
+                    <button
+                      disabled={savingProfile}
+                      className="w-fit rounded-xl bg-[#102848] px-5 py-3 text-sm font-black text-white disabled:opacity-40"
+                    >
+                      {savingProfile ? "Saving..." : "Save profile"}
+                    </button>
+                  </div>
+
+                  {profileMessage && (
+                    <p className="mt-3 text-sm font-bold text-[#102848]/55">
+                      {profileMessage}
+                    </p>
+                  )}
+                </form>
+              )}
             </section>
 
             <aside className="space-y-5">
               <div className="border border-[#DCE7F2] bg-[#102848] p-5 text-white shadow-sm">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
-                  CURRENT EXECUTION
+                  WHAT I'M WORKING ON
                 </p>
                 <h3 className="mt-4 text-xl font-black">
                   {buildingNow || "Tell people what you are working on"}
@@ -706,13 +897,13 @@ export default function DashboardPage() {
 
               <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#102848]/35">
-                  Verification
+                  Journey
                 </p>
                 <div className="mt-4 space-y-3">
                   {[
-                    "Submitted",
-                    "Peer Reviewed",
-                    "Verified",
+                    "Started",
+                    "Shared proof",
+                    "Reviewed",
                     "Trusted",
                     "Expert",
                   ].map((state, index) => (
@@ -735,109 +926,35 @@ export default function DashboardPage() {
 
               <div className="border border-[#DCE7F2] bg-white/95 p-5 shadow-sm">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#102848]/35">
-                  Skills
+                  Quick actions
                 </p>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {skills.length === 0 ? (
-                    <p className="text-sm font-bold text-[#102848]/50">
-                      No skills added yet.
-                    </p>
-                  ) : (
-                    skills.map((skill) => (
-                      <span
-                        key={skill.id}
-                        className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-black text-[#102848]/65 ring-1 ring-[#DCE7F2]"
-                      >
-                        {skill.skillName}
-                      </span>
-                    ))
-                  )}
-                </div>
-
-                <form
-                  onSubmit={handleCustomSkillSubmit}
-                  className="mt-4 flex gap-2"
-                >
-                  <input
-                    value={customSkill}
-                    onChange={(e) => setCustomSkill(e.target.value)}
-                    placeholder="Add skill"
-                    className="min-w-0 flex-1 border border-[#DCE7F2] px-3 py-2 text-sm font-bold outline-none"
-                  />
+                <div className="mt-4 grid gap-2">
                   <button
-                    disabled={savingSkill}
-                    className="rounded-lg bg-[#0890E0] px-3 py-2 text-sm font-black text-white"
+                    onClick={() => {
+                      setActiveSection("Proof of Work");
+                      setShowProofForm(true);
+                    }}
+                    className="rounded-xl bg-[#0890E0] px-4 py-3 text-left text-sm font-black text-white"
                   >
-                    Add
+                    Submit proof
                   </button>
-                </form>
 
-                {skillMessage && (
-                  <p className="mt-3 text-sm font-bold text-[#102848]/55">
-                    {skillMessage}
-                  </p>
-                )}
-              </div>
+                  <button
+                    onClick={() => setActiveSection("Skills")}
+                    className="rounded-xl border border-[#DCE7F2] bg-white px-4 py-3 text-left text-sm font-black"
+                  >
+                    Add skills
+                  </button>
 
-              {editingProfile && (
-                <form
-                  onSubmit={handleSaveProfile}
-                  className="border border-[#DCE7F2] bg-white p-5 shadow-sm"
-                >
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                  <button
+                    onClick={() => setActiveSection("Profile")}
+                    className="rounded-xl border border-[#DCE7F2] bg-white px-4 py-3 text-left text-sm font-black"
+                  >
                     Edit profile
-                  </p>
-
-                  <div className="mt-4 grid gap-3">
-                    <input
-                      value={headline}
-                      onChange={(e) => setHeadline(e.target.value)}
-                      placeholder="Headline"
-                      className="border border-[#DCE7F2] px-3 py-2 text-sm font-bold outline-none"
-                    />
-                    <input
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Location"
-                      className="border border-[#DCE7F2] px-3 py-2 text-sm font-bold outline-none"
-                    />
-                    <input
-                      value={availability}
-                      onChange={(e) => setAvailability(e.target.value)}
-                      placeholder="Availability"
-                      className="border border-[#DCE7F2] px-3 py-2 text-sm font-bold outline-none"
-                    />
-                    <textarea
-                      value={buildingNow}
-                      onChange={(e) => setBuildingNow(e.target.value)}
-                      placeholder="What are you building?"
-                      rows={3}
-                      className="border border-[#DCE7F2] px-3 py-2 text-sm font-bold outline-none"
-                    />
-                    <textarea
-                      value={story}
-                      onChange={(e) => setStory(e.target.value)}
-                      placeholder="Your story"
-                      rows={4}
-                      className="border border-[#DCE7F2] px-3 py-2 text-sm font-bold outline-none"
-                    />
-
-                    <button
-                      disabled={savingProfile}
-                      className="rounded-xl bg-[#102848] px-4 py-3 text-sm font-black text-white"
-                    >
-                      {savingProfile ? "Saving..." : "Save profile"}
-                    </button>
-                  </div>
-
-                  {profileMessage && (
-                    <p className="mt-3 text-sm font-bold text-[#102848]/55">
-                      {profileMessage}
-                    </p>
-                  )}
-                </form>
-              )}
+                  </button>
+                </div>
+              </div>
             </aside>
           </div>
         </section>

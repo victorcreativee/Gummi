@@ -25,7 +25,7 @@ export default async function HomePage() {
 
           <nav className="hidden items-center gap-8 text-sm font-bold md:flex">
             <a className="text-[#102848]/65">Explore</a>
-            <a className="text-[#102848]/65">Learning</a>
+            <a className="text-[#102848]/65">Learn</a>
             <a className="text-[#102848]/65">Proof</a>
           </nav>
 
@@ -50,7 +50,7 @@ export default async function HomePage() {
       <section className="mx-auto grid min-h-screen max-w-7xl gap-12 px-6 pt-28 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
           <p className="w-fit rounded-full border border-[#DCE7F2] bg-white px-4 py-2 text-sm font-black text-[#0890E0]">
-            Built for hidden talent
+            The home for invisible talent
           </p>
 
           <p className="mt-6 text-sm font-bold text-[#102848]/45">
@@ -67,9 +67,9 @@ export default async function HomePage() {
           </h1>
 
           <p className="mt-8 max-w-2xl text-lg leading-8 text-[#102848]/65 md:text-xl">
-            GUMMI helps skilled people prove what they can do, learn from real
-            professionals, build projects together, and get discovered through
-            work — not noise.
+            GUMMI helps members turn practical work into trust, relationships,
+            and real opportunities. Learn by doing, grow with experts, join
+            projects, and let your work speak for you.
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -77,7 +77,7 @@ export default async function HomePage() {
               href="/register"
               className="rounded-full bg-[#0890E0] px-7 py-4 text-center font-black text-white transition hover:scale-[1.02]"
             >
-              Start your proof profile
+              Start your journey
             </a>
 
             <a
@@ -92,7 +92,7 @@ export default async function HomePage() {
         <div className="rounded-[2.5rem] border border-[#DCE7F2] bg-white p-5 shadow-xl">
           <div className="rounded-[2rem] bg-[#F8FAFC] p-6 ring-1 ring-[#DCE7F2]">
             <p className="text-sm font-black uppercase tracking-wide text-[#102848]/40">
-              Proof card
+              Member journey
             </p>
 
             <h2 className="mt-4 text-3xl font-black leading-tight">
@@ -106,11 +106,11 @@ export default async function HomePage() {
 
             <div className="mt-6 rounded-[1.5rem] bg-[#102848] p-5 text-white">
               <p className="text-sm font-bold text-[#72C7F4]">
-                What GUMMI values
+                What matters here
               </p>
 
               <p className="mt-2 text-xl font-black leading-tight">
-                Clear thinking. Real execution. Work people can verify.
+                Effort. Growth. Collaboration. Work people can trust.
               </p>
             </div>
           </div>

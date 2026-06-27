@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import WorkspaceTopbar from "../../../components/workspace/WorkspaceTopbar";
 import {
+  createProjectMilestone,
   getProjectById,
   getProjectMembers,
+  getProjectMilestones,
   getProjectProofs,
   joinProject,
   GummiProject,
   ProjectMember,
+  ProjectMilestone,
   ProofSubmission,
 } from "../../../lib/api";
-
 type GummiUser = {
   id?: string;
   userId?: string;
@@ -27,6 +29,10 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<GummiProject | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [contributions, setContributions] = useState<ProofSubmission[]>([]);
+  const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
+  const [milestoneTitle, setMilestoneTitle] = useState("");
+  const [milestoneDescription, setMilestoneDescription] = useState("");
+  const [savingMilestone, setSavingMilestone] = useState(false);
   const [role, setRole] = useState("Contributor");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -39,12 +45,21 @@ export default function ProjectDetailPage() {
       getProjectById(projectId),
       getProjectMembers(projectId).catch(() => []),
       getProjectProofs(projectId).catch(() => []),
+      getProjectMilestones(projectId).catch(() => []),
     ])
-      .then(([loadedProject, loadedMembers, loadedContributions]) => {
-        setProject(loadedProject);
-        setMembers(loadedMembers);
-        setContributions(loadedContributions);
-      })
+      .then(
+        ([
+          loadedProject,
+          loadedMembers,
+          loadedContributions,
+          loadedMilestones,
+        ]) => {
+          setProject(loadedProject);
+          setMembers(loadedMembers);
+          setContributions(loadedContributions);
+          setMilestones(loadedMilestones);
+        }
+      )
       .catch((error) => {
         setMessage(
           error instanceof Error ? error.message : "Could not load project"
@@ -56,7 +71,34 @@ export default function ProjectDetailPage() {
   function getCurrentUserId() {
     return user?.id || user?.userId;
   }
+  async function handleCreateMilestone() {
+    if (!milestoneTitle.trim()) {
+      setMessage("Please write a milestone title.");
+      return;
+    }
 
+    setSavingMilestone(true);
+    setMessage("");
+
+    try {
+      const savedMilestone = await createProjectMilestone({
+        projectId,
+        title: milestoneTitle,
+        description: milestoneDescription,
+      });
+
+      setMilestones((current) => [savedMilestone, ...current]);
+      setMilestoneTitle("");
+      setMilestoneDescription("");
+      setMessage("Milestone added.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Could not add milestone"
+      );
+    } finally {
+      setSavingMilestone(false);
+    }
+  }
   async function handleJoinProject() {
     const userId = getCurrentUserId();
 
@@ -141,9 +183,88 @@ export default function ProjectDetailPage() {
             <div className="mt-10 border-t border-[#DCE7F2] pt-6">
               <h2 className="text-xl font-black">Project mission</h2>
               <p className="mt-3 text-sm leading-7 text-[#102848]/65">
-                This project is a collaboration space where builders can join,
+                This project is a collaboration space where members can join,
                 contribute, and turn execution into visible proof.
               </p>
+            </div>
+            <div className="mt-10 border-t border-[#DCE7F2] pt-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0890E0]">
+                    Milestones
+                  </p>
+                  <h2 className="mt-2 text-xl font-black">
+                    What this team is working toward
+                  </h2>
+                  <p className="mt-2 text-sm leading-7 text-[#102848]/60">
+                    Milestones help the team turn ideas into clear steps and
+                    visible progress.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3">
+                <input
+                  value={milestoneTitle}
+                  onChange={(event) => setMilestoneTitle(event.target.value)}
+                  placeholder="Add a milestone e.g. Build first prototype"
+                  className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                />
+
+                <textarea
+                  value={milestoneDescription}
+                  onChange={(event) =>
+                    setMilestoneDescription(event.target.value)
+                  }
+                  rows={3}
+                  placeholder="Describe what needs to be done and why it matters"
+                  className="border border-[#DCE7F2] px-4 py-3 text-sm font-bold outline-none focus:border-[#0890E0]"
+                />
+
+                <button
+                  type="button"
+                  onClick={handleCreateMilestone}
+                  disabled={savingMilestone}
+                  className="w-fit rounded-xl bg-[#102848] px-5 py-3 text-sm font-black text-white disabled:opacity-40"
+                >
+                  {savingMilestone ? "Adding..." : "Add milestone"}
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                {milestones.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-[#DCE7F2] bg-[#F8FAFC] p-5">
+                    <p className="text-sm font-bold text-[#102848]/55">
+                      No milestones yet. Add the first clear step for this
+                      project.
+                    </p>
+                  </div>
+                ) : (
+                  milestones.map((milestone) => (
+                    <div
+                      key={milestone.id}
+                      className="rounded-2xl border border-[#DCE7F2] bg-[#F8FAFC] p-5"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-base font-black">
+                            {milestone.title}
+                          </h3>
+                          {milestone.description && (
+                            <p className="mt-2 text-sm font-bold leading-6 text-[#102848]/60">
+                              {milestone.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#102848]/45 ring-1 ring-[#DCE7F2]">
+                          {milestone.completed ? "Completed" : "Open"}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
             <div className="mt-10 border-t border-[#DCE7F2] pt-6">

@@ -19,6 +19,14 @@ export type ProjectMember = {
   role: string;
   joinedAt: string;
 };
+export type ProjectMilestone = {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  createdAt: string;
+};
 export type ProofSubmission = {
   id: string;
   userId: string;
@@ -308,6 +316,52 @@ export async function getProjectProofs(
 
   if (!response.ok) {
     throw new Error(result.message || "Failed to load project contributions");
+  }
+
+  return result;
+}
+export async function createProjectMilestone(data: {
+  projectId: string;
+  title: string;
+  description: string;
+}) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/projects/${data.projectId}/milestones`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: data.title,
+        description: data.description,
+      }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to create milestone");
+  }
+
+  return result;
+}
+
+export async function getProjectMilestones(
+  projectId: string
+): Promise<ProjectMilestone[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/projects/${projectId}/milestones`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to load milestones");
   }
 
   return result;

@@ -8,6 +8,9 @@ import com.gummi.project.model.ProjectStatus;
 import com.gummi.project.repository.ProjectMemberRepository;
 import com.gummi.project.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
+import com.gummi.project.dto.CreateMilestoneRequest;
+import com.gummi.project.model.ProjectMilestone;
+import com.gummi.project.repository.ProjectMilestoneRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,15 +19,19 @@ import java.util.UUID;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+
     private final ProjectMemberRepository memberRepository;
+    private final ProjectMilestoneRepository milestoneRepository;
 
     public ProjectService(
-            ProjectRepository projectRepository,
-            ProjectMemberRepository memberRepository
-    ) {
-        this.projectRepository = projectRepository;
-        this.memberRepository = memberRepository;
-    }
+        ProjectRepository projectRepository,
+        ProjectMemberRepository memberRepository,
+        ProjectMilestoneRepository milestoneRepository
+) {
+    this.projectRepository = projectRepository;
+    this.memberRepository = memberRepository;
+    this.milestoneRepository = milestoneRepository;
+}
 
     public Project createProject(CreateProjectRequest request) {
         Project project = new Project();
@@ -64,5 +71,20 @@ public class ProjectService {
 
     public List<ProjectMember> getMembers(UUID projectId) {
         return memberRepository.findByProjectId(projectId);
+    }
+    public ProjectMilestone createMilestone(UUID projectId, CreateMilestoneRequest request) {
+        getProjectById(projectId);
+    
+        ProjectMilestone milestone = new ProjectMilestone();
+        milestone.setProjectId(projectId);
+        milestone.setTitle(request.title);
+        milestone.setDescription(request.description);
+    
+        return milestoneRepository.save(milestone);
+    }
+    
+    public List<ProjectMilestone> getMilestones(UUID projectId) {
+        getProjectById(projectId);
+        return milestoneRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
     }
 }

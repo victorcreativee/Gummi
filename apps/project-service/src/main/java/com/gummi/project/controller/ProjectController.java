@@ -6,6 +6,8 @@ import com.gummi.project.model.Project;
 import com.gummi.project.model.ProjectMember;
 import com.gummi.project.service.ProjectService;
 import org.springframework.web.bind.annotation.*;
+import com.gummi.project.dto.CreateMilestoneRequest;
+import com.gummi.project.model.ProjectMilestone;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,5 +51,17 @@ public class ProjectController {
     @GetMapping("/{projectId}/members")
     public List<ProjectMember> getProjectMembers(@PathVariable UUID projectId) {
         return projectService.getMembers(projectId);
+    }
+    @PostMapping("/{projectId}/milestones")
+    public ProjectMilestone createMilestone(
+            @PathVariable UUID projectId,
+            @RequestBody CreateMilestoneRequest request
+    ) {
+        return projectService.createMilestone(projectId, request);
+    }
+
+    @GetMapping("/{projectId}/milestones")
+    public List<ProjectMilestone> getMilestones(@PathVariable UUID projectId) {
+        return projectService.getMilestones(projectId);
     }
 }

@@ -51,8 +51,8 @@ export default function LoginPage() {
             </h1>
 
             <p className="mt-6 max-w-lg text-lg leading-8 text-white/60">
-              Continue building your profile, collecting skill signals, and
-              showing real work.
+              Continue growing your journey, sharing proof of work, and showing
+              real work.
             </p>
           </div>
 

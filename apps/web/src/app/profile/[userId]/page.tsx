@@ -26,7 +26,7 @@ export default async function PublicProfilePage({
 
       <section className="mx-auto max-w-6xl px-6 py-12">
         <a href="/dashboard" className="text-sm font-black text-[#0890E0]">
-          ← Back to workspace
+          ← Back
         </a>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_320px]">
@@ -191,7 +191,7 @@ export default async function PublicProfilePage({
 
             <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-[#DCE7F2]">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#102848]/35">
-                Profile signal
+                Growth record
               </p>
 
               <h3 className="mt-4 text-5xl font-black text-[#0890E0]">
@@ -199,7 +199,7 @@ export default async function PublicProfilePage({
               </h3>
 
               <p className="mt-3 text-sm leading-7 text-[#102848]/60">
-                Visible signals from skills and submitted proof.
+                Visible proof from shared skills and completed work.
               </p>
             </div>
 
