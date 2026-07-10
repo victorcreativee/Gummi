@@ -10,10 +10,13 @@ type WorkspaceTopbarProps = {
 };
 
 const navItems = [
-  { label: "My Journey", href: "/dashboard" },
+  { label: "Home", href: "/dashboard" },
   { label: "Explore", href: "/explore" },
+  { label: "Learn", href: "/learn" },
+  { label: "Challenges", href: "/challenges" },
   { label: "Projects", href: "/projects" },
   { label: "Opportunities", href: "/opportunities" },
+  { label: "My Journey", href: "/dashboard" },
 ];
 export default function WorkspaceTopbar({
   fullName,
@@ -33,9 +36,12 @@ export default function WorkspaceTopbar({
     router.push("/login");
   }
 
-  function isActive(href: string) {
+  function isActive(href: string, label?: string) {
     if (href === "/dashboard") {
-      return pathname === "/dashboard";
+      return (
+        pathname === "/dashboard" &&
+        (label === "Home" || label === "My Journey")
+      );
     }
 
     return pathname.startsWith(href);
@@ -64,7 +70,7 @@ export default function WorkspaceTopbar({
                 key={item.label}
                 href={item.href}
                 className={`py-5 ${
-                  isActive(item.href)
+                  isActive(item.href, item.label)
                     ? "border-b-2 border-[#0890E0] text-white"
                     : "text-white/65 hover:text-white"
                 }`}
@@ -109,6 +115,13 @@ export default function WorkspaceTopbar({
                   className="block rounded-lg px-3 py-2 text-sm font-bold text-white/75 hover:bg-white/10 hover:text-white"
                 >
                   Start project
+                </a>
+
+                <a
+                  href="/challenges"
+                  className="block rounded-lg px-3 py-2 text-sm font-bold text-white/75 hover:bg-white/10 hover:text-white"
+                >
+                  Find challenges
                 </a>
 
                 <a
@@ -212,7 +225,7 @@ export default function WorkspaceTopbar({
                 key={item.label}
                 href={item.href}
                 className={`rounded-xl px-3 py-3 text-sm font-black ${
-                  isActive(item.href)
+                  isActive(item.href, item.label)
                     ? "bg-white/10 text-white"
                     : "text-white/65"
                 }`}

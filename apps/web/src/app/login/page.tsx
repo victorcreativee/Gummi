@@ -1,8 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { loginUser } from "../../lib/api";
 import { useRouter } from "next/navigation";
+import { loginUser } from "../../lib/api";
+import { saveAuthSession } from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,9 +21,7 @@ export default function LoginPage() {
     try {
       const result = await loginUser({ email, password });
 
-      localStorage.setItem("gummi_token", result.token);
-      localStorage.setItem("gummi_user", JSON.stringify(result));
-
+      saveAuthSession(result);
       router.push("/dashboard");
     } catch (error) {
       setMessage(

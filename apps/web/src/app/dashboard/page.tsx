@@ -1,7 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { useRouter } from "next/navigation";
+import {
+  getCurrentUser,
+  getCurrentUserId,
+} from "../../lib/auth";
 import {
   addBuilderSkill,
   getBuilderSkills,
@@ -13,6 +17,7 @@ import {
 import WorkspaceTopbar from "../../components/workspace/WorkspaceTopbar";
 import JourneyStatCard from "../../components/journey/JourneyStatCard";
 import JourneyActionCard from "../../components/journey/JourneyActionCard";
+
 
 type GummiUser = {
   id?: string;
@@ -64,7 +69,7 @@ const journeySections = [
 export default function DashboardPage() {
   const router = useRouter();
 
-  const [user, setUser] = useState<GummiUser | null>(null);
+  const [user] = useState(() => getCurrentUser());
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [skills, setSkills] = useState<BuilderSkill[]>([]);
@@ -103,9 +108,7 @@ export default function DashboardPage() {
   const isTrustSection = activeSection === "Trust";
   const isProfileSection = activeSection === "Profile";
 
-  function getCurrentUserId() {
-    return user?.id || user?.userId;
-  }
+
 
   function formatProofLabel(value?: string) {
     if (!value) return "Not set";
@@ -143,38 +146,51 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("gummi_token");
-    const storedUser = localStorage.getItem("gummi_user");
+    const currentUserId = getCurrentUserId();
 
-    if (!token || !storedUser) {
-      router.push("/login");
+    if (!user || !currentUserId) {
+      router.replace("/login");
       return;
     }
 
-    const parsedUser = JSON.parse(storedUser);
-    const currentUserId = parsedUser.id || parsedUser.userId;
+    const authenticatedUserId: string = currentUserId;
+    let isMounted = true;
 
-    setUser(parsedUser);
+    async function loadDashboardData() {
+      try {
+        const [loadedSkills, loadedProfile, loadedProofs] = await Promise.all([
+          getBuilderSkills(authenticatedUserId).catch(() => []),
+          getUserProfile(authenticatedUserId).catch(() => null),
+          getUserProofs(authenticatedUserId).catch(() => []),
+        ]);
 
-    Promise.all([
-      getBuilderSkills(currentUserId).catch(() => []),
-      getUserProfile(currentUserId).catch(() => null),
-      getUserProofs(currentUserId).catch(() => []),
-    ])
-      .then(([loadedSkills, loadedProfile, loadedProofs]) => {
+        if (!isMounted) {
+          return;
+        }
+
         setSkills(loadedSkills);
         setProofs(loadedProofs);
 
         if (loadedProfile) {
-          setHeadline(loadedProfile.headline || "");
-          setLocation(loadedProfile.location || "");
-          setAvailability(loadedProfile.availability || "");
-          setBuildingNow(loadedProfile.buildingNow || "");
-          setStory(loadedProfile.story || "");
+          setHeadline(loadedProfile.headline ?? "");
+          setLocation(loadedProfile.location ?? "");
+          setAvailability(loadedProfile.availability ?? "");
+          setBuildingNow(loadedProfile.buildingNow ?? "");
+          setStory(loadedProfile.story ?? "");
         }
-      })
-      .finally(() => setCheckingAuth(false));
-  }, [router]);
+      } finally {
+        if (isMounted) {
+          setCheckingAuth(false);
+        }
+      }
+    }
+
+    void loadDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router, user]);
 
   async function handleAddSkill(skillName: string) {
     const currentUserId = getCurrentUserId();
@@ -200,7 +216,9 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleCustomSkillSubmit(event: FormEvent) {
+  async function handleCustomSkillSubmit(
+      event: SubmitEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     const cleanSkill = customSkill.trim();
@@ -210,7 +228,9 @@ export default function DashboardPage() {
     setCustomSkill("");
   }
 
-  async function handleSaveProfile(event: FormEvent) {
+  async function handleSaveProfile(
+      event: SubmitEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     const currentUserId = getCurrentUserId();
@@ -239,7 +259,9 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleCreateProof(event: FormEvent) {
+  async function handleCreateProof(
+      event: SubmitEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     const currentUserId = getCurrentUserId();
@@ -293,12 +315,15 @@ export default function DashboardPage() {
       </main>
     );
   }
+  if (!user) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-[#102848]">
       <WorkspaceTopbar
-        fullName={user?.fullName}
-        userId={getCurrentUserId()}
+          fullName={user.fullName}
+          userId={getCurrentUserId() ?? undefined}
         onNewProof={() => {
           setActiveSection("Proof of Work");
           setShowProofForm(true);
@@ -379,7 +404,7 @@ export default function DashboardPage() {
 
                   <div className="flex gap-2">
                     <a
-                      href={`/profile/${getCurrentUserId()}`}
+                        href={`/profile/${getCurrentUserId() ?? ""}`}
                       className="rounded-xl border border-[#DCE7F2] bg-white px-4 py-2.5 text-sm font-black"
                     >
                       Public profile
@@ -884,7 +909,7 @@ export default function DashboardPage() {
             <aside className="space-y-5">
               <div className="border border-[#DCE7F2] bg-[#102848] p-5 text-white shadow-sm">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
-                  WHAT I'M WORKING ON
+                  WHAT I&apos;M WORKING ON
                 </p>
                 <h3 className="mt-4 text-xl font-black">
                   {buildingNow || "Tell people what you are working on"}
