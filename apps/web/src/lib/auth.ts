@@ -87,3 +87,20 @@ export function clearAuthSession(): void {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
 }
+export function getSafeRedirectPath(
+    redirectValue: string | null,
+    fallbackPath = "/dashboard"
+) {
+    if (!redirectValue) {
+        return fallbackPath;
+    }
+
+    const isInternalPath =
+        redirectValue.startsWith("/") && !redirectValue.startsWith("//");
+
+    if (!isInternalPath) {
+        return fallbackPath;
+    }
+
+    return redirectValue;
+}

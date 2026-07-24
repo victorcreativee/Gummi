@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { clearAuthSession } from "../../lib/auth";
 
 type WorkspaceTopbarProps = {
   fullName?: string;
@@ -31,9 +32,9 @@ export default function WorkspaceTopbar({
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
   function handleLogout() {
-    localStorage.removeItem("gummi_token");
-    localStorage.removeItem("gummi_user");
-    router.push("/login");
+    clearAuthSession();
+    router.replace("/login");
+    router.refresh();
   }
 
   function isActive(href: string, label?: string) {

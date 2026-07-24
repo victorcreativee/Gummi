@@ -1,5 +1,6 @@
 "use client";
 
+import AuthGuard from "../auth/AuthGuard";
 import WorkspaceTopbar from "./WorkspaceTopbar";
 
 type WorkspaceLayoutProps = {
@@ -28,12 +29,13 @@ export default function WorkspaceLayout({
   children,
 }: WorkspaceLayoutProps) {
   return (
-    <main className="min-h-screen bg-[#F8FAFC] text-[#102848]">
-      <WorkspaceTopbar
+      <AuthGuard>
+        <main className="min-h-screen bg-[#F8FAFC] text-[#102848]">
+        <WorkspaceTopbar
         fullName={fullName}
         userId={userId}
         onNewProof={onNewProof}
-      />
+        />
 
       <div
         className={`grid min-h-[calc(100vh-4rem)] grid-cols-1 ${
@@ -78,5 +80,6 @@ export default function WorkspaceLayout({
         )}
       </div>
     </main>
+      </AuthGuard>
   );
 }

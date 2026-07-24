@@ -23,7 +23,7 @@ export default function RegisterPage() {
       const result = await registerUser({ fullName, email, password });
 
       saveAuthSession(result);
-      router.push("/dashboard");
+      router.replace("/onboarding");
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Something went wrong"

@@ -3,7 +3,10 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginUser } from "../../lib/api";
-import { saveAuthSession } from "../../lib/auth";
+import {
+  getSafeRedirectPath,
+  saveAuthSession,
+} from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,7 +25,12 @@ export default function LoginPage() {
       const result = await loginUser({ email, password });
 
       saveAuthSession(result);
-      router.push("/dashboard");
+
+      const searchParameters = new URLSearchParams(window.location.search);
+      const requestedPath = searchParameters.get("redirect");
+      const destination = getSafeRedirectPath(requestedPath);
+
+      router.replace(destination);
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Something went wrong"
