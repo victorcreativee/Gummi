@@ -46,4 +46,25 @@ public class TalentProxyController {
                 .retrieve()
                 .body(List.class);
     }
+    @PostMapping("/interests")
+    public Map addInterest(@RequestBody Map<String, Object> body) {
+        return restClient.post()
+                .uri(talentServiceUrl + "/api/talent/interests")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(Map.class);
+    }
+
+    @GetMapping("/interests/{userId}")
+    public List getInterests(@PathVariable String userId) {
+        return restClient.get()
+                .uri(
+                        talentServiceUrl
+                                + "/api/talent/interests/"
+                                + userId
+                )
+                .retrieve()
+                .body(List.class);
+    }
 }
