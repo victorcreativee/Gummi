@@ -202,6 +202,52 @@ export async function getBuilderSkills(userId: string) {
 
   return result;
 }
+export type MemberInterest = {
+  id: string;
+  userId: string;
+  interestName: string;
+  createdAt?: string;
+};
+
+export async function addMemberInterest(data: {
+  userId: string;
+  interestName: string;
+}): Promise<MemberInterest> {
+  const response = await fetch(`${API_BASE_URL}/api/talent/interests`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to add interest");
+  }
+
+  return result as MemberInterest;
+}
+
+export async function getMemberInterests(
+  userId: string
+): Promise<MemberInterest[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/talent/interests/${userId}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to load interests");
+  }
+
+  return Array.isArray(result) ? result : [];
+}
 
 export async function saveUserProfile(data: {
   userId: string;

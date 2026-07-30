@@ -92,7 +92,7 @@ export default function OnboardingPage() {
             </div>
 
             <p className="hidden text-sm font-medium text-[#102848]/55 sm:block">
-              Step 1 of 3
+              Step 1 of 4
             </p>
           </div>
         </header>

@@ -1,97 +1,93 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { type SyntheticEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthGuard from "../../../components/auth/AuthGuard";
-import { addBuilderSkill, getBuilderSkills } from "../../../lib/api";
+import {
+  addMemberInterest,
+  getMemberInterests,
+  type MemberInterest,
+} from "../../../lib/api";
 import { getCurrentUser } from "../../../lib/auth";
 
-type BuilderSkill = {
-  id: string;
-  userId: string;
-  skillName: string;
-  status?: string;
-  createdAt?: string;
-};
-
-type SkillGroup = {
+type InterestGroup = {
   title: string;
   description: string;
-  skills: string[];
+  interests: string[];
 };
 
-const skillGroups: SkillGroup[] = [
+const interestGroups: InterestGroup[] = [
   {
-    title: "Software and technology",
+    title: "Technology and innovation",
     description:
-      "Building websites, applications, systems, data tools, and technical products.",
-    skills: [
-      "Frontend Development",
-      "Backend Development",
-      "Mobile Development",
-      "UI Engineering",
-      "DevOps",
-      "Data Analysis",
+      "Products, tools, and technologies you want to explore or help build.",
+    interests: [
+      "Artificial Intelligence",
+      "Web Development",
+      "Mobile Applications",
+      "Data and Analytics",
       "Cybersecurity",
-      "Quality Assurance",
+      "Open Source",
+      "Digital Accessibility",
+      "Emerging Technologies",
     ],
   },
   {
-    title: "Design and creative work",
+    title: "Creative work and media",
     description:
-      "Creating visual experiences, stories, interfaces, and digital media.",
-    skills: [
-      "UI Design",
-      "UX Research",
-      "Graphic Design",
-      "Motion Design",
-      "Video Editing",
+      "Creative fields, storytelling formats, and visual experiences that interest you.",
+    interests: [
+      "Visual Design",
+      "Film and Video",
       "Photography",
-      "Illustration",
-      "Content Design",
+      "Music and Audio",
+      "Writing and Publishing",
+      "Animation",
+      "Brand Storytelling",
+      "Digital Art",
     ],
   },
   {
-    title: "Product and business",
+    title: "Business and social impact",
     description:
-      "Turning ideas into useful products, services, organizations, and strategies.",
-    skills: [
-      "Product Management",
-      "Project Management",
-      "Business Analysis",
-      "Digital Marketing",
-      "Sales",
-      "Community Building",
+      "Industries and causes where you would like your work to create value.",
+    interests: [
       "Entrepreneurship",
-      "Operations",
+      "Product Innovation",
+      "Social Impact",
+      "Climate Action",
+      "Education",
+      "Agriculture",
+      "Financial Inclusion",
+      "Public Service",
     ],
   },
   {
-    title: "People and communication",
+    title: "Community and professional growth",
     description:
-      "Helping teams communicate, learn, collaborate, and grow effectively.",
-    skills: [
-      "Technical Writing",
-      "Public Speaking",
+      "Ways you want to connect, contribute, and develop with other members.",
+    interests: [
+      "Collaboration",
       "Mentorship",
-      "Teaching",
+      "Career Growth",
+      "Remote Work",
+      "Community Building",
+      "Leadership",
       "Research",
-      "Team Leadership",
-      "Communication",
-      "Facilitation",
+      "Knowledge Sharing",
     ],
   },
 ];
 
-function normalizeSkillName(value: string) {
+function normalizeInterestName(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
 
-function skillKey(value: string) {
-  return normalizeSkillName(value).toLowerCase();
+function interestKey(value: string) {
+  return normalizeInterestName(value).toLowerCase();
 }
 
-export default function OnboardingSkillsPage() {
+export default function OnboardingInterestsPage() {
   const router = useRouter();
 
   const currentUser = getCurrentUser();
@@ -99,56 +95,62 @@ export default function OnboardingSkillsPage() {
 
   const firstName = currentUser?.fullName?.trim().split(/\s+/)[0] || "Builder";
 
-  const [existingSkills, setExistingSkills] = useState<BuilderSkill[]>([]);
+  const [existingInterests, setExistingInterests] = useState<MemberInterest[]>(
+    []
+  );
 
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [customSkill, setCustomSkill] = useState("");
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [customInterest, setCustomInterest] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const existingSkillKeys = useMemo(
-    () => new Set(existingSkills.map((skill) => skillKey(skill.skillName))),
-    [existingSkills]
+  const existingInterestKeys = useMemo(
+    () =>
+      new Set(
+        existingInterests.map((interest) => interestKey(interest.interestName))
+      ),
+    [existingInterests]
   );
 
-  const selectedSkillKeys = useMemo(
-    () => new Set(selectedSkills.map(skillKey)),
-    [selectedSkills]
+  const selectedInterestKeys = useMemo(
+    () => new Set(selectedInterests.map(interestKey)),
+    [selectedInterests]
   );
 
-  const totalSkillCount = useMemo(() => {
-    const allSkills = new Set<string>();
+  const totalInterestCount = useMemo(() => {
+    const allInterests = new Set<string>();
 
-    existingSkills.forEach((skill) => {
-      allSkills.add(skillKey(skill.skillName));
+    existingInterests.forEach((interest) => {
+      allInterests.add(interestKey(interest.interestName));
     });
 
-    selectedSkills.forEach((skill) => {
-      allSkills.add(skillKey(skill));
+    selectedInterests.forEach((interest) => {
+      allInterests.add(interestKey(interest));
     });
 
-    return allSkills.size;
-  }, [existingSkills, selectedSkills]);
+    return allInterests.size;
+  }, [existingInterests, selectedInterests]);
 
-  const canFinish = totalSkillCount >= 2 && !isSaving;
+  const canComplete = totalInterestCount >= 2 && !isSaving;
 
   useEffect(() => {
     if (!currentUserId) {
+      setMessage("We could not identify your account. Please sign in again.");
       setIsLoading(false);
       return;
     }
 
-    getBuilderSkills(currentUserId)
-      .then((skills) => {
-        setExistingSkills(Array.isArray(skills) ? skills : []);
+    getMemberInterests(currentUserId)
+      .then((interests) => {
+        setExistingInterests(Array.isArray(interests) ? interests : []);
       })
       .catch((error) => {
         setMessage(
           error instanceof Error
             ? error.message
-            : "We could not load your existing skills."
+            : "We could not load your interests."
         );
       })
       .finally(() => {
@@ -156,124 +158,125 @@ export default function OnboardingSkillsPage() {
       });
   }, [currentUserId]);
 
-  function isExistingSkill(skillName: string) {
-    return existingSkillKeys.has(skillKey(skillName));
+  function isExistingInterest(interestName: string) {
+    return existingInterestKeys.has(interestKey(interestName));
   }
 
-  function isSelectedSkill(skillName: string) {
-    return selectedSkillKeys.has(skillKey(skillName));
+  function isSelectedInterest(interestName: string) {
+    return selectedInterestKeys.has(interestKey(interestName));
   }
 
-  function toggleSkill(skillName: string) {
-    if (isExistingSkill(skillName) || isSaving) {
+  function toggleInterest(interestName: string) {
+    if (isExistingInterest(interestName) || isSaving) {
       return;
     }
 
-    const normalizedSkill = normalizeSkillName(skillName);
-    const normalizedKey = skillKey(normalizedSkill);
+    const normalizedInterest = normalizeInterestName(interestName);
+    const normalizedKey = interestKey(normalizedInterest);
 
-    setSelectedSkills((currentSkills) => {
-      const alreadySelected = currentSkills.some(
-        (skill) => skillKey(skill) === normalizedKey
+    setSelectedInterests((currentInterests) => {
+      const alreadySelected = currentInterests.some(
+        (interest) => interestKey(interest) === normalizedKey
       );
 
       if (alreadySelected) {
-        return currentSkills.filter(
-          (skill) => skillKey(skill) !== normalizedKey
+        return currentInterests.filter(
+          (interest) => interestKey(interest) !== normalizedKey
         );
       }
 
-      return [...currentSkills, normalizedSkill];
+      return [...currentInterests, normalizedInterest];
     });
 
     setMessage("");
   }
 
-  function handleCustomSkillSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleCustomInterestSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const normalizedSkill = normalizeSkillName(customSkill);
+    const normalizedInterest = normalizeInterestName(customInterest);
 
-    if (normalizedSkill.length < 2) {
-      setMessage("Enter a skill containing at least two characters.");
+    if (normalizedInterest.length < 2) {
+      setMessage("Enter an interest containing at least two characters.");
       return;
     }
 
-    const normalizedKey = skillKey(normalizedSkill);
+    const normalizedKey = interestKey(normalizedInterest);
 
     if (
-      existingSkillKeys.has(normalizedKey) ||
-      selectedSkillKeys.has(normalizedKey)
+      existingInterestKeys.has(normalizedKey) ||
+      selectedInterestKeys.has(normalizedKey)
     ) {
-      setMessage(`${normalizedSkill} is already included.`);
+      setMessage(`${normalizedInterest} is already included.`);
       return;
     }
 
-    setSelectedSkills((currentSkills) => [...currentSkills, normalizedSkill]);
+    setSelectedInterests((currentInterests) => [
+      ...currentInterests,
+      normalizedInterest,
+    ]);
 
-    setCustomSkill("");
+    setCustomInterest("");
     setMessage("");
   }
 
-  function removeSelectedSkill(skillName: string) {
+  function removeSelectedInterest(interestName: string) {
     if (isSaving) {
       return;
     }
 
-    const normalizedKey = skillKey(skillName);
+    const normalizedKey = interestKey(interestName);
 
-    setSelectedSkills((currentSkills) =>
-      currentSkills.filter((skill) => skillKey(skill) !== normalizedKey)
+    setSelectedInterests((currentInterests) =>
+      currentInterests.filter(
+        (interest) => interestKey(interest) !== normalizedKey
+      )
     );
   }
 
-  async function handleContinueToInterests() {
-    if (!currentUserId || !canFinish) {
+  async function handleCompleteOnboarding() {
+    if (!currentUserId || !canComplete) {
       return;
     }
 
     setIsSaving(true);
     setMessage("");
 
-    const savedSkills: BuilderSkill[] = [];
+    const savedInterests: MemberInterest[] = [];
 
     try {
-      for (const skillName of selectedSkills) {
-        const savedSkill = await addBuilderSkill({
+      for (const interestName of selectedInterests) {
+        const savedInterest = await addMemberInterest({
           userId: currentUserId,
-          skillName,
+          interestName,
         });
 
-        savedSkills.push(savedSkill);
+        savedInterests.push(savedInterest);
       }
 
-      setExistingSkills((currentSkills) => [...currentSkills, ...savedSkills]);
+      setExistingInterests((currentInterests) => [
+        ...currentInterests,
+        ...savedInterests,
+      ]);
 
-      setSelectedSkills([]);
+      setSelectedInterests([]);
 
-      const searchParameters = new URLSearchParams(window.location.search);
-
-      const goal = searchParameters.get("goal");
-
-      const destination = goal
-        ? `/onboarding/interests?goal=${encodeURIComponent(goal)}`
-        : "/onboarding/interests";
-
-      router.push(destination);
+      router.replace("/dashboard");
     } catch (error) {
       try {
-        const refreshedSkills = await getBuilderSkills(currentUserId);
+        const refreshedInterests = await getMemberInterests(currentUserId);
 
-        setExistingSkills(
-          Array.isArray(refreshedSkills) ? refreshedSkills : []
+        setExistingInterests(
+          Array.isArray(refreshedInterests) ? refreshedInterests : []
         );
 
-        setSelectedSkills((currentSelections) =>
+        setSelectedInterests((currentSelections) =>
           currentSelections.filter(
-            (selectedSkill) =>
-              !refreshedSkills.some(
-                (savedSkill: BuilderSkill) =>
-                  skillKey(savedSkill.skillName) === skillKey(selectedSkill)
+            (selectedInterest) =>
+              !refreshedInterests.some(
+                (savedInterest) =>
+                  interestKey(savedInterest.interestName) ===
+                  interestKey(selectedInterest)
               )
           )
         );
@@ -284,7 +287,7 @@ export default function OnboardingSkillsPage() {
       setMessage(
         error instanceof Error
           ? error.message
-          : "We could not save all your skills. Please try again."
+          : "We could not save all your interests. Please try again."
       );
     } finally {
       setIsSaving(false);
@@ -297,8 +300,8 @@ export default function OnboardingSkillsPage() {
     const goal = searchParameters.get("goal");
 
     const destination = goal
-      ? `/onboarding/profile?goal=${encodeURIComponent(goal)}`
-      : "/onboarding/profile";
+      ? `/onboarding/skills?goal=${encodeURIComponent(goal)}`
+      : "/onboarding/skills";
 
     router.push(destination);
   }
@@ -318,7 +321,7 @@ export default function OnboardingSkillsPage() {
             />
 
             <p className="mt-4 text-sm font-bold text-[#102848]/60">
-              Loading your skills…
+              Loading your interests…
             </p>
           </div>
         </main>
@@ -340,12 +343,12 @@ export default function OnboardingSkillsPage() {
                 <p className="text-sm font-black tracking-tight">GUMMI</p>
 
                 <p className="text-xs font-medium text-[#102848]/50">
-                  Choose your starting skills
+                  Choose your starting interests
                 </p>
               </div>
             </div>
 
-            <p className="text-sm font-bold text-[#102848]/55">Step 3 of 4</p>
+            <p className="text-sm font-bold text-[#102848]/55">Step 4 of 4</p>
           </div>
         </header>
 
@@ -356,38 +359,40 @@ export default function OnboardingSkillsPage() {
               onClick={handleBack}
               className="text-sm font-bold text-[#102848]/55 transition hover:text-[#102848]"
             >
-              ← Back to your profile
+              ← Back to your skills
             </button>
 
             <p className="mt-8 text-sm font-bold text-[#0890E0]">
-              Build your foundation, {firstName}
+              Final step, {firstName}
             </p>
 
             <h1 className="mt-3 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">
-              Which skills describe what you can build or contribute?
+              What subjects, industries, or causes interest you?
             </h1>
 
             <p className="mt-4 max-w-2xl text-base leading-7 text-[#102848]/65">
-              Choose at least two skills that reflect your current ability. You
-              do not need to be an expert. Your future challenges and proof of
-              work will show how those skills develop.
+              Select at least two areas you would enjoy learning about,
+              contributing to, or building projects around. Interests help GUMMI
+              personalize your journey without claiming that you already have
+              expertise in those areas.
             </p>
 
-            {existingSkills.length > 0 ? (
+            {existingInterests.length > 0 ? (
               <section className="mt-8 border border-[#B9DBEE] bg-[#F1F9FD] p-5">
                 <p className="text-sm font-black">Already on your profile</p>
 
                 <p className="mt-1 text-sm leading-6 text-[#102848]/55">
-                  These skills are already saved and will not be added twice.
+                  These interests are already saved and will not be added twice.
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {existingSkills.map((skill) => (
+                  {existingInterests.map((interest) => (
                     <span
-                      key={skill.id}
+                      key={interest.id}
                       className="border border-[#B9DBEE] bg-white px-3 py-2 text-sm font-bold text-[#102848]/70"
                     >
-                      {skill.skillName}
+                      {interest.interestName}
+
                       <span className="ml-2 text-[#0890E0]" aria-label="Saved">
                         ✓
                       </span>
@@ -398,32 +403,30 @@ export default function OnboardingSkillsPage() {
             ) : null}
 
             <div className="mt-8 space-y-8">
-              {skillGroups.map((group) => (
+              {interestGroups.map((group) => (
                 <section
                   key={group.title}
                   className="border-t border-[#DCE7F2] pt-6"
                 >
-                  <div>
-                    <h2 className="text-lg font-black">{group.title}</h2>
+                  <h2 className="text-lg font-black">{group.title}</h2>
 
-                    <p className="mt-1 max-w-2xl text-sm leading-6 text-[#102848]/55">
-                      {group.description}
-                    </p>
-                  </div>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-[#102848]/55">
+                    {group.description}
+                  </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {group.skills.map((skillName) => {
-                      const existing = isExistingSkill(skillName);
+                    {group.interests.map((interestName) => {
+                      const existing = isExistingInterest(interestName);
 
-                      const selected = isSelectedSkill(skillName);
+                      const selected = isSelectedInterest(interestName);
 
                       return (
                         <button
-                          key={skillName}
+                          key={interestName}
                           type="button"
                           disabled={existing || isSaving}
                           aria-pressed={selected || existing}
-                          onClick={() => toggleSkill(skillName)}
+                          onClick={() => toggleInterest(interestName)}
                           className={`border px-3 py-2 text-sm font-bold transition ${
                             existing
                               ? "cursor-default border-[#B9DBEE] bg-[#F1F9FD] text-[#102848]/60"
@@ -433,7 +436,7 @@ export default function OnboardingSkillsPage() {
                           }`}
                         >
                           {existing ? "✓ " : selected ? "− " : "+ "}
-                          {skillName}
+                          {interestName}
                         </button>
                       );
                     })}
@@ -443,71 +446,72 @@ export default function OnboardingSkillsPage() {
             </div>
 
             <section className="mt-9 border border-[#DCE7F2] bg-white p-5 sm:p-6">
-              <h2 className="text-lg font-black">Add another skill</h2>
+              <h2 className="text-lg font-black">Add another interest</h2>
 
               <p className="mt-1 text-sm leading-6 text-[#102848]/55">
-                Add a specific skill that is not included above. Use a clear
-                name such as “Spring Boot”, “Coffee Agronomy”, or “Sound
-                Engineering”.
+                Add an area that is not included above, such as “Coffee
+                Technology”, “Healthcare Innovation”, or “Sustainable
+                Architecture”.
               </p>
 
               <form
-                onSubmit={handleCustomSkillSubmit}
+                onSubmit={handleCustomInterestSubmit}
                 className="mt-4 flex flex-col gap-3 sm:flex-row"
               >
-                <label htmlFor="customSkill" className="sr-only">
-                  Custom skill
+                <label htmlFor="customInterest" className="sr-only">
+                  Custom interest
                 </label>
 
                 <input
-                  id="customSkill"
-                  name="customSkill"
+                  id="customInterest"
+                  name="customInterest"
                   type="text"
-                  maxLength={80}
-                  value={customSkill}
+                  maxLength={120}
+                  value={customInterest}
                   disabled={isSaving}
-                  onChange={(event) => setCustomSkill(event.target.value)}
-                  placeholder="Enter a specific skill"
+                  onChange={(event) => setCustomInterest(event.target.value)}
+                  placeholder="Enter a specific interest"
                   className="min-w-0 flex-1 border border-[#C9D8E6] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#102848]/35 focus:border-[#0890E0] focus:ring-2 focus:ring-[#0890E0]/15 disabled:bg-[#F1F4F7]"
                 />
 
                 <button
                   type="submit"
-                  disabled={customSkill.trim().length < 2 || isSaving}
+                  disabled={customInterest.trim().length < 2 || isSaving}
                   className="border border-[#0890E0] px-5 py-3 text-sm font-black text-[#0890E0] transition hover:bg-[#EDF7FD] disabled:cursor-not-allowed disabled:border-[#B6C9D8] disabled:text-[#102848]/35"
                 >
-                  Add skill
+                  Add interest
                 </button>
               </form>
             </section>
 
-            {selectedSkills.length > 0 ? (
+            {selectedInterests.length > 0 ? (
               <section className="mt-7 border border-[#DCE7F2] bg-white p-5 sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-base font-black">Ready to add</h2>
 
                     <p className="mt-1 text-sm text-[#102848]/55">
-                      These skills will be saved when you finish onboarding.
+                      These interests will be saved when you complete this step.
                     </p>
                   </div>
 
                   <span className="text-sm font-black text-[#0890E0]">
-                    {selectedSkills.length}
+                    {selectedInterests.length}
                   </span>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {selectedSkills.map((skillName) => (
+                  {selectedInterests.map((interestName) => (
                     <button
-                      key={skillKey(skillName)}
+                      key={interestKey(interestName)}
                       type="button"
                       disabled={isSaving}
-                      onClick={() => removeSelectedSkill(skillName)}
+                      onClick={() => removeSelectedInterest(interestName)}
                       className="border border-[#0890E0] bg-[#EDF7FD] px-3 py-2 text-sm font-bold text-[#087DBF] transition hover:bg-[#DFF2FC] disabled:cursor-not-allowed"
-                      aria-label={`Remove ${skillName}`}
+                      aria-label={`Remove ${interestName}`}
                     >
-                      {skillName}
+                      {interestName}
+
                       <span className="ml-2" aria-hidden="true">
                         ×
                       </span>
@@ -538,31 +542,34 @@ export default function OnboardingSkillsPage() {
 
               <button
                 type="button"
-                disabled={!canFinish}
-                onClick={handleContinueToInterests}
+                disabled={!canComplete}
+                onClick={handleCompleteOnboarding}
                 className="min-w-48 bg-[#0890E0] px-5 py-3 text-sm font-black text-white transition hover:bg-[#077FC6] disabled:cursor-not-allowed disabled:bg-[#B6C9D8]"
               >
-                {isSaving ? "Saving your skills…" : "Continue to interests"}
+                {isSaving ? "Saving your interests…" : "Complete this step"}
               </button>
             </div>
           </section>
 
           <aside className="h-fit border border-[#DCE7F2] bg-white p-6 lg:sticky lg:top-8">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#102848]/40">
-              Your starting foundation
+              Your starting interests
             </p>
 
             <div className="mt-5 border-b border-[#DCE7F2] pb-5">
               <p className="text-4xl font-black text-[#0890E0]">
-                {totalSkillCount}
+                {totalInterestCount}
               </p>
 
               <p className="mt-1 text-sm font-bold">
-                {totalSkillCount === 1 ? "skill selected" : "skills selected"}
+                {totalInterestCount === 1
+                  ? "interest selected"
+                  : "interests selected"}
               </p>
 
               <p className="mt-2 text-sm leading-6 text-[#102848]/55">
-                Choose at least two. You can add more from your dashboard later.
+                Choose at least two. You can update them from your profile
+                later.
               </p>
             </div>
 
@@ -574,8 +581,9 @@ export default function OnboardingSkillsPage() {
 
                 <div>
                   <p className="text-sm font-black">Direction selected</p>
+
                   <p className="mt-1 text-xs leading-5 text-[#102848]/50">
-                    You identified what you want from GUMMI first.
+                    You identified what you want from GUMMI.
                   </p>
                 </div>
               </li>
@@ -587,21 +595,37 @@ export default function OnboardingSkillsPage() {
 
                 <div>
                   <p className="text-sm font-black">Starting profile</p>
+
                   <p className="mt-1 text-xs leading-5 text-[#102848]/50">
-                    You gave people useful context about your journey.
+                    You gave members useful context about yourself.
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E7EEF5] text-xs font-black text-[#102848]/55">
+                  ✓
+                </span>
+
+                <div>
+                  <p className="text-sm font-black">Skills</p>
+
+                  <p className="mt-1 text-xs leading-5 text-[#102848]/50">
+                    You selected abilities you can develop and prove.
                   </p>
                 </div>
               </li>
 
               <li className="flex gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0890E0] text-xs font-black text-white">
-                  3
+                  4
                 </span>
 
                 <div>
-                  <p className="text-sm font-black">Skills</p>
+                  <p className="text-sm font-black">Interests</p>
+
                   <p className="mt-1 text-xs leading-5 text-[#102848]/50">
-                    Choose the abilities you will grow and prove through action.
+                    Choose topics that should shape your journey.
                   </p>
                 </div>
               </li>
@@ -609,13 +633,12 @@ export default function OnboardingSkillsPage() {
 
             <div className="mt-7 border-t border-[#DCE7F2] pt-5">
               <p className="text-sm font-black">
-                Skills are not automatically verified
+                Interests are not skill claims
               </p>
 
               <p className="mt-2 text-sm leading-6 text-[#102848]/60">
-                Selecting a skill tells GUMMI your starting direction.
-                Challenges, projects, feedback, and proof of work will build
-                trust around it.
+                An interest tells GUMMI where you would like to explore. Your
+                proof of work will show what you can actually do.
               </p>
             </div>
           </aside>
