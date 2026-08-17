@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthGuard from "../../components/auth/AuthGuard";
 import { getCurrentUser } from "../../lib/auth";
-
-type OnboardingGoal = "LEARN" | "PROVE" | "COLLABORATE" | "OPPORTUNITY";
+import {
+  getMyOnboardingState,
+  saveOnboardingGoal,
+  type OnboardingGoal,
+} from "../../lib/api";
 
 type GoalOption = {
   id: OnboardingGoal;
@@ -50,6 +53,9 @@ export default function OnboardingPage() {
   const router = useRouter();
 
   const [selectedGoal, setSelectedGoal] = useState<OnboardingGoal | null>(null);
+  const [isLoadingGoal, setIsLoadingGoal] = useState(true);
+  const [isSavingGoal, setIsSavingGoal] = useState(false);
+  const [message, setMessage] = useState("");
 
   const currentUser = getCurrentUser();
   const firstName = currentUser?.fullName?.trim().split(/\s+/)[0] || "Builder";
@@ -57,20 +63,55 @@ export default function OnboardingPage() {
   const selectedOption = goalOptions.find(
     (option) => option.id === selectedGoal
   );
+  useEffect(() => {
+    let isMounted = true;
 
-  function handleContinue() {
-    if (!selectedGoal) {
+    getMyOnboardingState()
+      .then((onboarding) => {
+        if (!isMounted || !onboarding) {
+          return;
+        }
+
+        setSelectedGoal(onboarding.primaryGoal);
+      })
+      .catch(() => {
+        if (isMounted) {
+          setMessage("We could not load your saved onboarding direction.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingGoal(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+  async function handleContinue() {
+    if (!selectedGoal || isSavingGoal) {
       return;
     }
 
-    /*
-     * The next onboarding task will save this goal through the backend.
-     * For now, we pass it to the next screen through the URL so that
-     * this page can be tested without creating fake permanent storage.
-     */
-    const goal = encodeURIComponent(selectedGoal);
+    setIsSavingGoal(true);
+    setMessage("");
 
-    router.push(`/onboarding/profile?goal=${goal}`);
+    try {
+      await saveOnboardingGoal(selectedGoal);
+
+      const goal = encodeURIComponent(selectedGoal);
+
+      router.push(`/onboarding/profile?goal=${goal}`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not save your direction. Please try again."
+      );
+    } finally {
+      setIsSavingGoal(false);
+    }
   }
 
   return (
@@ -170,13 +211,16 @@ export default function OnboardingPage() {
 
               <button
                 type="button"
-                disabled={!selectedGoal}
+                disabled={!selectedGoal || isLoadingGoal || isSavingGoal}
                 onClick={handleContinue}
                 className="min-w-40 bg-[#0890E0] px-5 py-3 text-sm font-black text-white transition hover:bg-[#077FC6] disabled:cursor-not-allowed disabled:bg-[#B6C9D8]"
               >
-                Continue
+                {isSavingGoal ? "Saving..." : "Continue"}
               </button>
             </div>
+            {message ? (
+              <p className="mt-4 text-sm font-bold text-red-600">{message}</p>
+            ) : null}
           </section>
 
           <aside className="h-fit border border-[#DCE7F2] bg-white p-6 lg:sticky lg:top-8">
@@ -219,7 +263,20 @@ export default function OnboardingPage() {
                 <div>
                   <p className="text-sm font-black">Choose skills</p>
                   <p className="mt-1 text-sm leading-5 text-[#102848]/55">
-                    Select what you can contribute and what you want to grow.
+                    Select abilities you can contribute and develop.
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E7EEF5] text-xs font-black text-[#102848]/55">
+                  4
+                </span>
+
+                <div>
+                  <p className="text-sm font-black">Choose interests</p>
+                  <p className="mt-1 text-sm leading-5 text-[#102848]/55">
+                    Select topics, industries, and causes you want to explore.
                   </p>
                 </div>
               </li>

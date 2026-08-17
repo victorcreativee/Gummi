@@ -6,6 +6,7 @@ import AuthGuard from "../../../components/auth/AuthGuard";
 import {
   addMemberInterest,
   getMemberInterests,
+  completeOnboarding,
   type MemberInterest,
 } from "../../../lib/api";
 import { getCurrentUser } from "../../../lib/auth";
@@ -253,7 +254,7 @@ export default function OnboardingInterestsPage() {
 
         savedInterests.push(savedInterest);
       }
-
+      await completeOnboarding();
       setExistingInterests((currentInterests) => [
         ...currentInterests,
         ...savedInterests,

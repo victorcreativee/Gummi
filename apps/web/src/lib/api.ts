@@ -1,6 +1,20 @@
+import { getAuthToken } from "./auth";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
+function getAuthenticatedJsonHeaders(): Record<string, string> {
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to do that");
+  }
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
 export type GummiProject = {
   id: string;
   ownerId: string;
@@ -167,16 +181,13 @@ export async function loginUser(data: { email: string; password: string }) {
 
   return result;
 }
-
 export async function addBuilderSkill(data: {
   userId: string;
   skillName: string;
 }) {
   const response = await fetch(`${API_BASE_URL}/api/talent/skills`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthenticatedJsonHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -208,6 +219,16 @@ export type MemberInterest = {
   interestName: string;
   createdAt?: string;
 };
+export type OnboardingGoal = "LEARN" | "PROVE" | "COLLABORATE" | "OPPORTUNITY";
+
+export type MemberOnboardingState = {
+  id: string;
+  userId: string;
+  primaryGoal: OnboardingGoal;
+  onboardingCompleted: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export async function addMemberInterest(data: {
   userId: string;
@@ -215,9 +236,7 @@ export async function addMemberInterest(data: {
 }): Promise<MemberInterest> {
   const response = await fetch(`${API_BASE_URL}/api/talent/interests`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthenticatedJsonHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -259,9 +278,7 @@ export async function saveUserProfile(data: {
 }) {
   const response = await fetch(`${API_BASE_URL}/api/users/profiles`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthenticatedJsonHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -411,4 +428,61 @@ export async function getProjectMilestones(
   }
 
   return result;
+}
+
+export async function saveOnboardingGoal(
+  primaryGoal: OnboardingGoal
+): Promise<MemberOnboardingState> {
+  const response = await fetch(`${API_BASE_URL}/api/users/onboarding/goal`, {
+    method: "POST",
+    headers: getAuthenticatedJsonHeaders(),
+    body: JSON.stringify({
+      primaryGoal,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to save your onboarding goal");
+  }
+
+  return result as MemberOnboardingState;
+}
+
+export async function completeOnboarding(): Promise<MemberOnboardingState> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/users/onboarding/complete`,
+    {
+      method: "POST",
+      headers: getAuthenticatedJsonHeaders(),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to complete onboarding");
+  }
+
+  return result as MemberOnboardingState;
+}
+
+export async function getMyOnboardingState(): Promise<MemberOnboardingState | null> {
+  const response = await fetch(`${API_BASE_URL}/api/users/onboarding/me`, {
+    headers: getAuthenticatedJsonHeaders(),
+    cache: "no-store",
+  });
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to load onboarding state");
+  }
+
+  return result as MemberOnboardingState;
 }

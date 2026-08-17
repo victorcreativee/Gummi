@@ -565,7 +565,6 @@ export default function OnboardingSkillsPage() {
                 Choose at least two. You can add more from your dashboard later.
               </p>
             </div>
-
             <ol className="mt-6 space-y-5">
               <li className="flex gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E7EEF5] text-xs font-black text-[#102848]/55">
@@ -602,6 +601,19 @@ export default function OnboardingSkillsPage() {
                   <p className="text-sm font-black">Skills</p>
                   <p className="mt-1 text-xs leading-5 text-[#102848]/50">
                     Choose the abilities you will grow and prove through action.
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E7EEF5] text-xs font-black text-[#102848]/55">
+                  4
+                </span>
+
+                <div>
+                  <p className="text-sm font-black">Interests</p>
+                  <p className="mt-1 text-xs leading-5 text-[#102848]/50">
+                    Choose subjects and causes you want to explore.
                   </p>
                 </div>
               </li>

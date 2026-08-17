@@ -210,8 +210,7 @@ export default function OnboardingProfilePage() {
                 </p>
               </div>
             </div>
-
-            <p className="text-sm font-bold text-[#102848]/55">Step 2 of 3</p>
+            <p className="text-sm font-bold text-[#102848]/55">Step 2 of 4</p>
           </div>
         </header>
 
@@ -509,9 +508,22 @@ export default function OnboardingProfilePage() {
                 </span>
 
                 <div>
-                  <p className="text-sm font-black">Skills and interests</p>
+                  <p className="text-sm font-black">Skills</p>
                   <p className="mt-1 text-xs leading-5 text-[#102848]/50">
-                    Choose what you contribute and what you want to grow.
+                    Choose abilities you can contribute and develop.
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E7EEF5] text-xs font-black text-[#102848]/55">
+                  4
+                </span>
+
+                <div>
+                  <p className="text-sm font-black">Interests</p>
+                  <p className="mt-1 text-xs leading-5 text-[#102848]/50">
+                    Choose subjects and causes you want to explore.
                   </p>
                 </div>
               </li>
