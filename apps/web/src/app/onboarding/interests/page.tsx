@@ -248,7 +248,6 @@ export default function OnboardingInterestsPage() {
     try {
       for (const interestName of selectedInterests) {
         const savedInterest = await addMemberInterest({
-          userId: currentUserId,
           interestName,
         });
 

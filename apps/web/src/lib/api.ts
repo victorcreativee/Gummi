@@ -181,10 +181,7 @@ export async function loginUser(data: { email: string; password: string }) {
 
   return result;
 }
-export async function addBuilderSkill(data: {
-  userId: string;
-  skillName: string;
-}) {
+export async function addBuilderSkill(data: { skillName: string }) {
   const response = await fetch(`${API_BASE_URL}/api/talent/skills`, {
     method: "POST",
     headers: getAuthenticatedJsonHeaders(),
@@ -231,7 +228,6 @@ export type MemberOnboardingState = {
 };
 
 export async function addMemberInterest(data: {
-  userId: string;
   interestName: string;
 }): Promise<MemberInterest> {
   const response = await fetch(`${API_BASE_URL}/api/talent/interests`, {
@@ -269,7 +265,6 @@ export async function getMemberInterests(
 }
 
 export async function saveUserProfile(data: {
-  userId: string;
   headline: string;
   location: string;
   availability: string;

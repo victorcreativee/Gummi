@@ -240,7 +240,6 @@ export default function OnboardingSkillsPage() {
     try {
       for (const skillName of selectedSkills) {
         const savedSkill = await addBuilderSkill({
-          userId: currentUserId,
           skillName,
         });
 

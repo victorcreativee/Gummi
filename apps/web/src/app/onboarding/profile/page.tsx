@@ -144,7 +144,6 @@ export default function OnboardingProfilePage() {
 
     try {
       await saveUserProfile({
-        userId: currentUserId,
         headline: form.headline.trim(),
         location: form.location.trim(),
         availability: form.availability,
